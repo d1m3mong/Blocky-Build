@@ -1,0 +1,12 @@
+[package]
+name = "dijag/blocky-build"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+dataservicetyped = "leifstout/dataservicetyped@1.0.5"
+vide = "centau/vide@0.4.1"
+jecs = "ukendio/jecs@0.11.0"
+networker = "leifstout/networker@0.3.1"
+trove = "sleitnick/trove@1.8.0"
