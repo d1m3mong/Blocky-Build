@@ -4,7 +4,9 @@ local GameManager = require(ReplicatedStorage.Shared.Game.GameManager)
 local Grid = require(ReplicatedStorage.Shared.Grid.Grid)
 local PrompGridSignal = require(ReplicatedStorage.Shared.Signals.PrompGridSignal)
 local Ecs = require(ReplicatedStorage.Shared.Ecs.World)
-local ModuleSingleton = require(ReplicatedStorage.Shared.ModuleSingleton)
+local GameSingleton = require(ReplicatedStorage.Shared.GameSingleton)
+local Packets = require(ReplicatedStorage.Shared.Packets)
+local VotingSingleton = require(ReplicatedStorage.Shared.VotingSingleton)
 
 local world = Ecs.world
 local owner = Ecs.owner
@@ -62,4 +64,6 @@ Players.PlayerAdded:Connect(function(player: Player)
 	PrompGridSignal:Fire(player, grid)
 end)
 
-ModuleSingleton.gameManager:intermission()
+task.spawn(function(): ()
+	GameSingleton:intermission(VotingSingleton)
+end)

@@ -3,8 +3,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local trove = require(ReplicatedStorage.Packages.trove)
 local BlocksManager = require(ReplicatedStorage.Shared.Blocks.BlocksManager)
 local BlocksPlacement = require(ReplicatedStorage.Shared.Blocks.BlocksPlacement)
+local GameSingleton = require(ReplicatedStorage.Shared.GameSingleton)
 local Grid = require(ReplicatedStorage.Shared.Grid.Grid)
-local ModuleSingleton = require(ReplicatedStorage.Shared.ModuleSingleton)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local PrompGridSignal = require(ReplicatedStorage.Shared.Signals.PrompGridSignal)
 
@@ -56,7 +56,7 @@ Packets.PlaceBlock.OnServerEvent:Connect(function(player: Player, data: { Vector
 		return
 	end
 
-	local gameState = ModuleSingleton.gameManager:getGameState()
+	local gameState = GameSingleton:getGameState()
 	if gameState ~= "started" then
 		return
 	end
@@ -65,7 +65,7 @@ Packets.PlaceBlock.OnServerEvent:Connect(function(player: Player, data: { Vector
 end)
 
 Packets.DeleteBlock.OnServerEvent:Connect(function(player: Player, data: { Position: Vector3, instance: Instance }): ()
-	local gameState = ModuleSingleton.gameManager:getGameState()
+	local gameState = GameSingleton:getGameState()
 	if gameState ~= "started" then
 		return
 	end

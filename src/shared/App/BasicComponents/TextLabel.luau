@@ -14,6 +14,8 @@ return function(props: PropsType.Props): UICorner
 
 		Text = props.Text,
 
+		BackgroundTransparency = props.BackgroundTransparency,
+
 		TextColor3 = props.TextColor3,
 
 		TextScaled = props.TextScaled,

@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VotingManager = require(script.Parent.VotingManager)
 local jecs = require(ReplicatedStorage.Packages.jecs)
 local packet = require(ReplicatedStorage.Packages.packet)
 local signal = require(ReplicatedStorage.Packages.signal)
@@ -7,6 +8,7 @@ local trove = require(ReplicatedStorage.Packages.trove)
 local BlocksManager = require(ReplicatedStorage.Shared.Blocks.BlocksManager)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local Ecs = require(ReplicatedStorage.Shared.Ecs.World)
+local VotingSingleton = require(ReplicatedStorage.Shared.VotingSingleton)
 
 local world = Ecs.world
 local isInGame = Ecs.isInGame
@@ -106,7 +108,7 @@ function gameManager.tpPlayersToGrid(self: gameManager, certainPlayer: Player?):
 	end
 end
 
-const initalTime = 300
+const initalTime = 6
 
 function gameManager:startCountdown()
 	self.gameState = "started"
@@ -156,12 +158,12 @@ function gameManager.result(self: gameManager)
 
 	task.wait(5)
 
-	self:intermission()
+	self:intermission(VotingSingleton)
 end
 
-const intermissionTime = 60
+const intermissionTime = 10
 
-function gameManager.intermission(self: gameManager)
+function gameManager.intermission(self: gameManager, votingManager: VotingManager.VotingManager)
 	print "INTERMISSION"
 
 	local currentTime = intermissionTime
@@ -169,6 +171,7 @@ function gameManager.intermission(self: gameManager)
 	self.gameState = "intermission"
 
 	--TODO: Vote Theme
+	local winning = votingManager:startVote()
 
 	while task.wait(1) do
 		currentTime -= 1
@@ -182,7 +185,7 @@ function gameManager.intermission(self: gameManager)
 		end
 	end
 
-	print "MEOW"
+	print(winning)
 
 	self:startGame()
 end
