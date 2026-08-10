@@ -1,14 +1,16 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Ecs = require(ReplicatedStorage.Shared.Ecs.World)
 
-local jecs = require(ReplicatedStorage.Packages.jecs)
-
-local world = jecs.World.new()
-
-const Position = world:component()
-const instance = world:component()
+local world = Ecs.world
+local Position = Ecs.Position
+local instance = Ecs.instance
+local id = Ecs.id
+local data = Ecs.data
+local owner = Ecs.owner
 
 local BlockTypes = require(script.Parent.BlockTypes)
+local BlocksList = require(script.Parent.BlocksList)
 
 type Block = BlockTypes.Block
 
@@ -26,7 +28,7 @@ const speed = 10
 const params = RaycastParams.new()
 params.FilterType = Enum.RaycastFilterType.Exclude
 
-function BlockPlacement:start(player: Player): ()
+function BlockPlacement:start(player: Player, toggle: boolean): ()
 	if RunService:IsServer() then
 		return
 	end
@@ -99,21 +101,21 @@ function BlockPlacement:start(player: Player): ()
 	end)
 end
 
-function BlockPlacement:Place(Block: Block)
+function BlockPlacement:Place(Block: Block, player: Player)
 	if RunService:IsClient() then
 		return
 	end
 
-	local blockFolder = workspace:FindFirstChild("BlocksFolder")
+	local blockFolder = workspace:FindFirstChild("BlocksFolder" .. player.UserId)
 	if not blockFolder then
 		blockFolder = Instance.new("Folder")
-		blockFolder.Name = "blockFolder"
+		blockFolder.Name = "BlocksFolder" .. player.UserId
 
 		blockFolder.Parent = workspace
 	end
 
 	local block = Instance.new("Part")
-	block.Color = Block.Color or Color3.new(1, 1, 1)
+	block.Color = BlocksList.BlockList[Block.Id].Color or Color3.fromRGB(177, 170, 170)
 	block.Position = Block.Position
 	block.Size = Vector3.new(5, 5, 5)
 
@@ -129,6 +131,9 @@ function BlockPlacement:Place(Block: Block)
 
 	world:set(Entity, Position, Block.Position)
 	world:set(Entity, instance, block)
+	world:set(Entity, data, Block.data)
+	world:set(Entity, id, Block.Id)
+	world:set(Entity, owner, player.UserId)
 end
 
 return BlockPlacement
