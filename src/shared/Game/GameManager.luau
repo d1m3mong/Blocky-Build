@@ -172,6 +172,9 @@ function gameManager.intermission(self: gameManager, votingManager: VotingManage
 
 	--TODO: Vote Theme
 	local winning = votingManager:startVote()
+	for _, plr: Player in Players:GetPlayers() do
+		Packets.GetWinningMapData:FireClient(plr, winning)
+	end
 
 	while task.wait(1) do
 		currentTime -= 1

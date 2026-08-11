@@ -18,4 +18,5 @@ return {
 	EndVote = packet("EndVote"),
 	CastVote = packet("CastVote", packet.String),
 	RequestVoteState = packet("RequestVoteState"),
+	GetWinningMapData = packet("GetWinningMapData", packet.String),
 }

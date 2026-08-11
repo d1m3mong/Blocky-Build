@@ -27,7 +27,7 @@ local function determinBlockPosition()
 		return
 	end
 
-	local position = ray.Position + ray.Normal + (blockSize / 10)
+	local position = ray.Position + ray.Normal * (blockSize.Y / 2)
 
 	return position
 end
@@ -79,6 +79,9 @@ t = UserInputService.InputBegan:Connect(function(input: InputObject, gpe: boolea
 
 		if deleteModeEnabled == true then
 			local block = determinInstance()
+			if not block then
+				return
+			end
 
 			data.instance = block.Instance
 			data.Position = block.Instance.Position

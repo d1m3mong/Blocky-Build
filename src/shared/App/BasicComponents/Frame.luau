@@ -16,6 +16,8 @@ return function(props: PropsType.Props)
 
 		BackgroundColor3 = props.BackgroundColor3,
 
+		Visible = props.Visible,
+
 		table.unpack(props),
 	}
 end

@@ -433,4 +433,22 @@ themes.themes = {
 	},
 }
 
+export type Map = {
+	Name: string,
+	Difficulty: number,
+	Category: string,
+	Description: string,
+}
+
+function themes.getMapData(mapName: string): Map?
+	for _, map in pairs(themes.themes) do
+		if map.Name == mapName then
+			print(map)
+			return map
+		end
+	end
+
+	return nil
+end
+
 return themes

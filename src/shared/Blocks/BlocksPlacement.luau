@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Ecs = require(ReplicatedStorage.Shared.Ecs.World)
@@ -15,6 +16,7 @@ local BlocksList = require(script.Parent.BlocksList)
 type Block = BlockTypes.Block
 
 local Trove = require(ReplicatedStorage.Packages.trove)
+local DeletionModeSignal = require(ReplicatedStorage.Shared.Signals.DeletionModeSignal)
 
 local BlockPlacement = {}
 BlockPlacement.__index = BlockPlacement
@@ -28,7 +30,31 @@ const speed = 10
 const params = RaycastParams.new()
 params.FilterType = Enum.RaycastFilterType.Exclude
 
-function BlockPlacement:start(player: Player, toggle: boolean): ()
+local isDeleting = false
+local currentPlayer: Player? = nil
+
+DeletionModeSignal:Connect(function(state: boolean)
+	isDeleting = state
+
+	if currentPlayer then
+		BlockPlacement:start(currentPlayer)
+	end
+end)
+
+local function isPlacedBlock(target: Instance): boolean
+	if not target:IsA("BasePart") then
+		return false
+	end
+
+	local parent = target.Parent
+
+	return CollectionService:HasTag(target, "PlacedBlock")
+		and parent ~= nil
+		and parent:IsA("Folder")
+		and string.match(parent.Name, "^BlocksFolder%d+$") ~= nil
+end
+
+function BlockPlacement:start(player: Player): ()
 	if RunService:IsServer() then
 		return
 	end
@@ -38,7 +64,17 @@ function BlockPlacement:start(player: Player, toggle: boolean): ()
 		return
 	end
 
-	params.FilterDescendantsInstances = { player.Character }
+	currentPlayer = player
+
+	local ignored = { player.Character }
+
+	local baseplate = workspace:FindFirstChild("Baseplate")
+	if baseplate then
+		table.insert(ignored, baseplate)
+		print "YEASSS"
+	end
+
+	params.FilterDescendantsInstances = ignored
 
 	local mouse = player:GetMouse()
 
@@ -72,6 +108,29 @@ function BlockPlacement:start(player: Player, toggle: boolean): ()
 	local playerTrove = Trove.new()
 	self.trove[player.UserId] = playerTrove
 
+	print(isDeleting)
+
+	if isDeleting then
+		local highlight = playerTrove:Add(Instance.new("Highlight"))
+
+		highlight.FillColor = Color3.fromRGB(255, 0, 22)
+		highlight.FillTransparency = 0.5
+		highlight.OutlineTransparency = 0
+		highlight.Parent = workspace
+
+		playerTrove:Connect(RunService.RenderStepped, function()
+			local ray = workspace:Raycast(mouse.UnitRay.Origin, mouse.UnitRay.Direction * 1000, params)
+
+			if ray and isPlacedBlock(ray.Instance) then
+				highlight.Adornee = ray.Instance
+			else
+				highlight.Adornee = nil
+			end
+		end)
+
+		return
+	end
+
 	local block = playerTrove:Add(Instance.new("Part")) :: Part
 
 	block.Size = Vector3.new(5, 5, 5)
@@ -91,7 +150,7 @@ function BlockPlacement:start(player: Player, toggle: boolean): ()
 			return
 		end
 
-		local position = ray.Position + ray.Normal + (block.Size / 10)
+		local position = ray.Position + ray.Normal * (block.Size.Y / 2)
 
 		local goal = Vector3.new(snapToGrid(position.X, 5), snapToGrid(position.Y, 5), snapToGrid(position.Z, 5))
 
@@ -122,6 +181,8 @@ function BlockPlacement:Place(Block: Block, player: Player)
 	block.Anchored = true
 
 	block.Parent = blockFolder
+
+	CollectionService:AddTag(block, "PlacedBlock")
 
 	if Block.OnPlace then
 		Block.OnPlace()

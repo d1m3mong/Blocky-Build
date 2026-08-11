@@ -20,6 +20,8 @@ return function(props: PropsType.Props): UICorner
 
 		TextScaled = props.TextScaled,
 
+		Visible = props.Visible,
+
 		table.unpack(props),
 	}
 end

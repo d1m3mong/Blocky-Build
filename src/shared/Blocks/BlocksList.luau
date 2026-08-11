@@ -7,8 +7,11 @@ local function assignModel(Blocklist: dict)
 	for index, value in Blocklist do
 		local model = BlocksFolder:FindFirstChild(index)
 		if not model then
-			warn("[BlocksList]: No Model found for" .. index)
-			continue
+			model = Instance.new("Part")
+			model.Name = index
+			model.Size = Vector3.new(5, 5, 5)
+
+			model.Parent = script.Parent.Blocks
 		end
 
 		value.Model = model

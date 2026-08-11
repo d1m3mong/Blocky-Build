@@ -2,11 +2,13 @@ local ExampleV2Service = game:GetService("ExampleV2Service")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packet = require(ReplicatedStorage.Packages.packet)
+local signal = require(ReplicatedStorage.Packages.signal)
 local vide = require(ReplicatedStorage.Packages.vide)
 local Frame = require(ReplicatedStorage.Shared.App.BasicComponents.Frame)
 local ScreenGUI = require(ReplicatedStorage.Shared.App.BasicComponents.ScreenGUI)
 local TextLabel = require(ReplicatedStorage.Shared.App.BasicComponents.TextLabel)
 local UIListLayout = require(ReplicatedStorage.Shared.App.BasicComponents.UIListLayout)
+local UIState = require(ReplicatedStorage.Shared.App.Util.UIState)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 
 local player = Players.LocalPlayer
@@ -17,6 +19,7 @@ local indexes = vide.indexes
 local derive = vide.derive
 local show = vide.show
 local action = vide.action
+local effect = vide.effect
 
 type Map = {
 	Name: string,
@@ -25,20 +28,33 @@ type Map = {
 	Description: string,
 }
 
+const guiName = "Voting"
+
+local voted = source(nil)
+
 local mapSlot1: () -> Map? = source(nil)
 local mapSlot2: () -> Map? = source(nil)
 local mapSlot3: () -> Map? = source(nil)
 
 Packets.StartVote.OnClientEvent:Connect(function(map1: Map, map2: Map, map3: Map)
+	voted(nil)
+
 	mapSlot1(map1)
 	mapSlot2(map2)
 	mapSlot3(map3)
+
+	UIState.open(guiName)
 end)
 
 Packets.EndVote.OnClientEvent:Connect(function()
+	voted(nil)
+
 	mapSlot1(nil)
 	mapSlot2(nil)
 	mapSlot3(nil)
+
+	UIState.close(guiName)
+	UIState.open("HUD")
 end)
 
 Packets.RequestVoteState:Fire()
@@ -50,7 +66,7 @@ local function MapCard(mapSource: () -> Map?)
 		BackgroundTransparency = 1,
 
 		show(function()
-			return mapSource() ~= nil
+			return mapSource() ~= nil and UIState.isOpen(guiName)()
 		end, function()
 			local map = mapSource() :: Map
 
@@ -59,7 +75,13 @@ local function MapCard(mapSource: () -> Map?)
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				Position = UDim2.fromScale(0.5, 0.5),
 
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundColor3 = function()
+					if voted() == map.Name then
+						return Color3.fromRGB(70, 220, 90)
+					end
+
+					return Color3.fromRGB(255, 255, 255)
+				end,
 
 				action(function(instance: Frame)
 					local connection = instance.InputBegan:Connect(function(input: InputObject)
@@ -68,6 +90,7 @@ local function MapCard(mapSource: () -> Map?)
 						end
 
 						Packets.CastVote:Fire(map.Name)
+						voted(map.Name)
 					end)
 
 					return function()
@@ -108,7 +131,7 @@ end
 local app = root(function()
 	--selene: allow(mixed_table)
 
-	ScreenGUI {
+	return ScreenGUI {
 		Parent = player.PlayerGui,
 		IgnoreGuiInset = true,
 
