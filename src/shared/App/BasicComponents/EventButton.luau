@@ -25,5 +25,14 @@ return function(props: PropsType.Props): TextButton
 		table.unpack(props),
 	}
 
+	vide.cleanup(TweenPress.attach {
+		instance = button,
+		tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut),
+
+		pressGoals = { Size = UDim2.fromScale(props.Size.X.Scale - 0.2, props.Size.Y.Scale - 0.2) },
+		hoverGoals = { Size = UDim2.fromScale(props.Size.X.Scale - 0.1, props.Size.Y.Scale - 0.1) },
+		idleGoals = { Size = props.Size },
+	})
+
 	return button
 end

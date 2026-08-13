@@ -1,4 +1,3 @@
-local ExampleV2Service = game:GetService("ExampleV2Service")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packet = require(ReplicatedStorage.Packages.packet)
@@ -27,6 +26,10 @@ type Map = {
 	Category: string,
 	Description: string,
 }
+
+local abilitiesOpen = UIState.isOpen("Abilities")
+local votingOpen = UIState.isOpen("Voting")
+local activeGui = UIState.getActive()
 
 const guiName = "Voting"
 
@@ -66,7 +69,9 @@ local function MapCard(mapSource: () -> Map?)
 		BackgroundTransparency = 1,
 
 		show(function()
-			return mapSource() ~= nil and UIState.isOpen(guiName)()
+			print(votingOpen(), abilitiesOpen())
+
+			return mapSource() ~= nil and activeGui() == "Voting"
 		end, function()
 			local map = mapSource() :: Map
 

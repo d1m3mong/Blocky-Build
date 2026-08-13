@@ -19,4 +19,7 @@ return {
 	CastVote = packet("CastVote", packet.String),
 	RequestVoteState = packet("RequestVoteState"),
 	GetWinningMapData = packet("GetWinningMapData", packet.String),
+
+	PurchaseAbility = packet("ParchaseAbility", packet.String),
+	EquipAbility = packet("EquipAbility", packet.String),
 }

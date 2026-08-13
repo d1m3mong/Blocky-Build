@@ -8,6 +8,8 @@ local template = {
 
 	firstJoined = nil,
 	lastLeft = nil,
+
+	Abilities = {},
 }
 
 return dataservicetyped({

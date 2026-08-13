@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local vide = require(ReplicatedStorage.Packages.vide)
 local Button = require(ReplicatedStorage.Shared.App.BasicComponents.Button)
+local EventButton = require(ReplicatedStorage.Shared.App.BasicComponents.EventButton)
 local Frame = require(ReplicatedStorage.Shared.App.BasicComponents.Frame)
 local ImageLabel = require(ReplicatedStorage.Shared.App.BasicComponents.ImageLabel)
 local ScreenGUI = require(ReplicatedStorage.Shared.App.BasicComponents.ScreenGUI)
@@ -36,7 +37,7 @@ local function createFrames()
 			--selene: allow(mixed_table)
 			LayoutOrder = Enum.SortOrder.LayoutOrder,
 
-			Button {
+			EventButton {
 				Text = "",
 				Position = UDim2.fromScale(0.5, 0.5),
 				Size = UDim2.fromScale(1, 1),
