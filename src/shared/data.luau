@@ -3,6 +3,7 @@ local dataservicetyped = require(ReplicatedStorage.Packages.dataservicetyped)
 
 local template = {
 	currency = {
+		Coins = 1000,
 		Wins = 0,
 	},
 
@@ -14,4 +15,5 @@ local template = {
 
 return dataservicetyped({
 	template = template,
+	--resetData = true,
 })

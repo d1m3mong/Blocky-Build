@@ -8,6 +8,7 @@ local trove = require(ReplicatedStorage.Packages.trove)
 local BlocksManager = require(ReplicatedStorage.Shared.Blocks.BlocksManager)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local Ecs = require(ReplicatedStorage.Shared.Ecs.World)
+local gameManagerSignals = require(ReplicatedStorage.Shared.Signals.gameManagerSignals)
 local VotingSingleton = require(ReplicatedStorage.Shared.VotingSingleton)
 
 local world = Ecs.world
@@ -45,6 +46,8 @@ function gameManager.startGame(self: gameManager)
 		--return
 	end
 
+	gameManagerSignals.gameStart:Fire()
+
 	for _, player in Players:GetPlayers() do
 		print(player.UserId, " game has been initialized!")
 
@@ -63,7 +66,7 @@ function gameManager.startGame(self: gameManager)
 	self:startCountdown()
 end
 
-const offset = CFrame.new(0, 3, 0)
+const offset = CFrame.new(0, 3, 25)
 
 function gameManager.tpPlayersToGrid(self: gameManager, certainPlayer: Player?): ()
 	if certainPlayer then
@@ -136,6 +139,8 @@ function gameManager.rating(self: gameManager)
 	print "RATING"
 
 	self.gameState = "rating"
+
+	gameManagerSignals.ratingStart:Fire()
 
 	for _Entity, player: Player in world:query(playerRef) do
 		self:tpPlayersToGrid(player)

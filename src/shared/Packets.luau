@@ -9,10 +9,16 @@ local payload = {
 }
 
 return {
+	-- Blocks
+
 	PlaceBlock = packet("Placeblock", { Position = packet.Vector3S16, Id = packet.String }),
 	DeleteBlock = packet("Deleteblock", { instance = packet.Instance, Position = packet.Vector3S16 }),
 
+	-- Timer
+
 	UpdateTimer = packet("UpdateTimer", packet.NumberU16),
+
+	-- Voting
 
 	StartVote = packet("StartVote", payload, payload, payload),
 	EndVote = packet("EndVote"),
@@ -20,6 +26,13 @@ return {
 	RequestVoteState = packet("RequestVoteState"),
 	GetWinningMapData = packet("GetWinningMapData", packet.String),
 
-	PurchaseAbility = packet("ParchaseAbility", packet.String),
+	-- Abilities
+
+	PurchaseAbility = packet("PurchaseAbility", packet.String),
 	EquipAbility = packet("EquipAbility", packet.String),
+	UpdateAbility = packet("UpdateAbility", packet.String, packet.Boolean8),
+	UseAbility = packet("UseAbility"),
+
+	UsedAbility = packet("UsedAbility", packet.String, packet.String, packet.NumberU8),
+	SquidInk = packet("SquidInk", packet.Boolean8),
 }

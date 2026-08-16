@@ -113,6 +113,9 @@ export type Props = {
 	MajorAlignment: Enum.HorizontalAlignment?,
 	MinorAlignment: Enum.VerticalAlignment?,
 
+	--// UIScale
+	Scale: number,
+
 	--// Events
 	OnClick: (() -> ())?,
 	OnMouseEnter: (() -> ())?,

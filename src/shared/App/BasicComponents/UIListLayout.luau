@@ -4,7 +4,7 @@ local PropsType = require(ReplicatedStorage.Shared.App.PropsType)
 
 local create = vide.create
 
-return function(props: PropsType.Props): UIStroke
+return function(props: PropsType.Props): UIListLayout
 	return create "UIListLayout" {
 		FillDirection = props.FillDirection,
 		HorizontalAlignment = props.HorizontalAlignment,

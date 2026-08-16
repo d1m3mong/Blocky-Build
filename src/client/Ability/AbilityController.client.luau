@@ -1,4 +1,5 @@
 local ActivityHistoryEventService = game:GetService("ActivityHistoryEventService")
+local DebuggerUIService = game:GetService("DebuggerUIService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packet = require(ReplicatedStorage.Packages.packet)
@@ -15,6 +16,7 @@ local UIStroke = require(ReplicatedStorage.Shared.App.BasicComponents.UIStroke)
 local UIState = require(ReplicatedStorage.Shared.App.Util.UIState)
 local AbilitysConfig = require(ReplicatedStorage.Shared.Game.AbilitysConfig)
 local Packets = require(ReplicatedStorage.Shared.Packets)
+local data = require(ReplicatedStorage.Shared.data)
 local data = require(ReplicatedStorage.Shared.data).client
 
 local player = Players.LocalPlayer
@@ -29,6 +31,28 @@ local derive = vide.derive
 local MenuOpen = source(false)
 local abilities = source(AbilitysConfig) :: vide.Source<AbilitysConfig.AbilitiesType>
 local selectedAbility = source(nil)
+local playerAbilities = source(data.Abilities())
+
+Packets.UpdateAbility.OnClientEvent:Connect(function(abilityName, equipped)
+	print("UpdateAbility:", abilityName, equipped)
+
+	local current = playerAbilities()
+	local newAbilities = table.clone(current)
+
+	if equipped then
+		for name, ability in newAbilities do
+			if name ~= abilityName and ability.Equipped then
+				newAbilities[name] = table.clone(ability)
+				newAbilities[name].Equipped = false
+			end
+		end
+	end
+
+	newAbilities[abilityName] = table.clone(newAbilities[abilityName] or {})
+	newAbilities[abilityName].Equipped = equipped
+
+	playerAbilities(newAbilities)
+end)
 
 local function createFrame(Ability: AbilitysConfig.AbilityType, name: string)
 	--selene: allow(mixed_table)
@@ -83,8 +107,8 @@ app = root(function()
 		Button {
 			Text = "",
 
-			Size = UDim2.fromScale(0.15, 0.3),
-			Position = UDim2.fromScale(0.1, 0.5),
+			Size = UDim2.fromScale(0.075, 0.15),
+			Position = UDim2.fromScale(0.05, 0.8),
 
 			AnchorPoint = Vector2.new(0.5, 0.5),
 
@@ -98,9 +122,20 @@ app = root(function()
 			end,
 		},
 
-		effect(function()
-			--TODO: Tooltips, buying, equipping/../..,
-		end),
+		-- Ability
+
+		Button {
+			Text = "",
+
+			Size = UDim2.fromScale(0.075, 0.15),
+			Position = UDim2.fromScale(0.8, 0.65),
+
+			AnchorPoint = Vector2.new(0.5, 0.5),
+
+			OnClick = function()
+				Packets.UseAbility:Fire()
+			end,
+		},
 
 		show(function()
 			return selectedAbility() ~= nil and MenuOpen()
@@ -131,13 +166,20 @@ app = root(function()
 				},
 
 				Button {
-					Text = function()
-						local playerAbilities = data.Abilities()
-						if playerAbilities[selectedAbility()] then
-							return "Equip"
+					Text = derive(function()
+						local pAbilities = playerAbilities()
+						local ability = pAbilities[selectedAbility()]
+
+						if not ability then
+							return "Purchase"
 						end
-						return "Purchase"
-					end,
+
+						if ability.Equipped then
+							return "Dequip"
+						end
+
+						return "Equip"
+					end),
 
 					Size = UDim2.fromScale(1, 0.2),
 					Position = UDim2.fromScale(0.5, 0.8),
@@ -147,11 +189,13 @@ app = root(function()
 					TextScaled = true,
 
 					OnClick = function()
-						local playerAbilities = data.Abilities()
-						if playerAbilities[selectedAbility()] then
-							Packets.EquipAbility:Fire(selectedAbility())
+						local currentAbilities = playerAbilities()
+						local selected = selectedAbility()
+
+						if currentAbilities[selected] then
+							Packets.EquipAbility:Fire(selected)
 						else
-							Packets.PurchaseAbility:Fire(selectedAbility())
+							Packets.PurchaseAbility:Fire(selected)
 						end
 					end,
 				},
