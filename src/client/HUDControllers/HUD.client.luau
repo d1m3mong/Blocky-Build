@@ -15,6 +15,8 @@ local DeleteBlockSignal = require(ReplicatedStorage.Shared.Signals.DeleteBlockSi
 local DeletionModeSignal = require(ReplicatedStorage.Shared.Signals.DeletionModeSignal)
 
 local show = vide.show
+local spring = vide.spring
+local source = vide.source
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild "PlayerGui"
@@ -34,8 +36,14 @@ end)
 local votingOpen = UIState.isOpen("Voting")
 const guiName = "HUD"
 
+local basicSizeDelete = Vector2.new(1, 1)
+local activeSizeDelete = Vector2.new(0.8, 0.8)
+local targetSizeDelete = source(basicSizeDelete)
+
 --selene: allow(unused_variable)
 local app = vide.root(function()
+	local animatedSizeDelete, setSpring = spring(targetSizeDelete, 0.25, 0.4)
+
 	--selene: allow(mixed_table)
 	return ScreenGUI {
 		Name = "HUD",
@@ -55,13 +63,24 @@ local app = vide.root(function()
 
 			Button {
 				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(1, 1),
+				Size = function()
+					local v = animatedSizeDelete()
+
+					return UDim2.fromScale(v.X, v.Y)
+				end,
 
 				AnchorPoint = Vector2.new(0.5, 0.5),
 
 				BackgroundColor3 = Color3.fromRGB(155, 155, 0),
 
 				OnClick = function()
+					targetSizeDelete(activeSizeDelete)
+					setSpring { impulse = Vector2.new(0.15, 0.15) }
+
+					task.delay(0.12, function()
+						targetSizeDelete(basicSizeDelete)
+					end)
+
 					toggle(not toggle())
 
 					DeleteBlockSignal:Fire(toggle())

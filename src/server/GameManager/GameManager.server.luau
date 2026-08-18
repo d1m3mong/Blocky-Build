@@ -6,6 +6,7 @@ local PrompGridSignal = require(ReplicatedStorage.Shared.Signals.PrompGridSignal
 local Ecs = require(ReplicatedStorage.Shared.Ecs.World)
 local GameSingleton = require(ReplicatedStorage.Shared.GameSingleton)
 local Packets = require(ReplicatedStorage.Shared.Packets)
+local gameManagerSignals = require(ReplicatedStorage.Shared.Signals.gameManagerSignals)
 local VotingSingleton = require(ReplicatedStorage.Shared.VotingSingleton)
 
 local world = Ecs.world
@@ -62,6 +63,40 @@ Players.PlayerAdded:Connect(function(player: Player)
 	local grid = Grid:setupGrid(player, part)
 
 	PrompGridSignal:Fire(player, grid)
+end)
+
+gameManagerSignals.ratingStart:Connect(function()
+	for _, plr in Players:GetPlayers() do
+		Packets.PrompRate:FireClient(plr, true)
+	end
+end)
+
+gameManagerSignals.ratePlayer:Connect(function(player: Player)
+	for _, plr in Players:GetPlayers() do
+		Packets.PrompPlayerRate:FireClient(plr, player)
+	end
+end)
+
+local votes = {}
+
+Packets.RatePlayer.OnServerEvent:Connect(function(player: Player, votedPlayer: Instance, stars: number)
+	if not votedPlayer or not votedPlayer:IsA("Player") then
+		return
+	end
+
+	if player == votedPlayer then
+		return
+	end
+
+	if stars > 5 or stars < 1 then
+		return
+	end
+
+	votes[votedPlayer] = votes[votedPlayer] or {}
+
+	votes[votedPlayer][player] = stars
+
+	print(stars)
 end)
 
 task.spawn(function(): ()

@@ -35,4 +35,10 @@ return {
 
 	UsedAbility = packet("UsedAbility", packet.String, packet.String, packet.NumberU8),
 	SquidInk = packet("SquidInk", packet.Boolean8),
+
+	-- Rating
+
+	PrompRate = packet("PrompRate", packet.Boolean8),
+	PrompPlayerRate = packet("PrompPlayerRate", packet.Instance),
+	RatePlayer = packet("Rate", packet.Instance, packet.NumberU8),
 }

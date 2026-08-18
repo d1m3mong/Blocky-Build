@@ -22,8 +22,6 @@ local notificationList = source({})
 local nextOrder = 0
 
 Packets.UsedAbility.OnClientEvent:Connect(function(playerName: string, abilityName: string, duration: number)
-	print "HSHDHHSD"
-
 	local list = table.clone(notificationList())
 
 	nextOrder += 1

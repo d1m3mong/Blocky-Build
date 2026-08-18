@@ -1,16 +1,25 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local vide = require(ReplicatedStorage.Packages.vide)
 local PropsType = require(ReplicatedStorage.Shared.App.PropsType)
-local TweenPress = require(ReplicatedStorage.Shared.App.Util.TweenPress)
 
 local create = vide.create
+local source = vide.source
+local spring = vide.spring
 
 return function(props: PropsType.Props): TextButton
-	local button: TextButton
+	local baseSize = props.Size
+	local pressedSize = UDim2.fromScale(baseSize.X.Scale / 1.1, baseSize.Y.Scale / 1.1)
 
-	--selene: allow(mixed_table)
-	button = create "TextButton" {
-		Size = props.Size,
+	local targetSize = source(baseSize)
+
+	local animatedSize, setSpring = spring(targetSize, 0.25, 0.75)
+
+	local button = create "TextButton" {
+		Size = function()
+			return animatedSize()
+		end,
+
 		Position = props.Position,
 		AnchorPoint = props.AnchorPoint,
 
@@ -20,19 +29,38 @@ return function(props: PropsType.Props): TextButton
 		Text = props.Text,
 		TextScaled = props.TextScaled,
 
-		Activated = props.OnClick,
+		Name = props.Name,
+
+		Activated = function()
+			targetSize(pressedSize)
+
+			setSpring {
+				impulse = Vector2.new(0.15, 0.15),
+			}
+
+			task.delay(0.12, function()
+				targetSize(baseSize)
+			end)
+
+			if props.OnClick then
+				props.OnClick()
+			end
+		end,
+
+		MouseEnter = function()
+			targetSize(pressedSize)
+
+			setSpring { impulse = Vector2.new(0.1, 0.1) }
+		end,
+
+		MouseLeave = function()
+			targetSize(baseSize)
+
+			setSpring { impulse = Vector2.new(0.1, 0.1) }
+		end,
 
 		table.unpack(props),
 	}
-
-	vide.cleanup(TweenPress.attach {
-		instance = button,
-		tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut),
-
-		pressGoals = { Size = UDim2.fromScale(props.Size.X.Scale - 0.2, props.Size.Y.Scale - 0.2) },
-		hoverGoals = { Size = UDim2.fromScale(props.Size.X.Scale - 0.1, props.Size.Y.Scale - 0.1) },
-		idleGoals = { Size = props.Size },
-	})
 
 	return button
 end

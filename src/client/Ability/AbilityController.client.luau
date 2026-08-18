@@ -1,7 +1,9 @@
 local ActivityHistoryEventService = game:GetService("ActivityHistoryEventService")
 local DebuggerUIService = game:GetService("DebuggerUIService")
+local ExampleV2Service = game:GetService("ExampleV2Service")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VisibilityCheckDispatcher = game:GetService("VisibilityCheckDispatcher")
 local packet = require(ReplicatedStorage.Packages.packet)
 local vide = require(ReplicatedStorage.Packages.vide)
 local Button = require(ReplicatedStorage.Shared.App.BasicComponents.Button)
@@ -27,6 +29,7 @@ local effect = vide.effect
 local show = vide.show
 local indexes = vide.indexes
 local derive = vide.derive
+local spring = vide.spring
 
 local MenuOpen = source(false)
 local abilities = source(AbilitysConfig) :: vide.Source<AbilitysConfig.AbilitiesType>
@@ -69,6 +72,7 @@ local function createFrame(Ability: AbilitysConfig.AbilityType, name: string)
 			Text = "",
 
 			Size = UDim2.fromScale(1, 1),
+
 			Position = UDim2.fromScale(0.5, 0.5),
 
 			AnchorPoint = Vector2.new(0.5, 0.5),
@@ -87,14 +91,48 @@ local function createFrame(Ability: AbilitysConfig.AbilityType, name: string)
 
 		ImageLabel {
 			Image = "",
-
 			BackgroundTransparency = 0,
 		},
 	}
 end
 
+local baseSizeButton = Vector2.new(0.075, 0.15)
+local activeSizeButton = Vector2.new(0.05, 0.1)
+local targetSizeButton = source(baseSizeButton)
+
+local baseSizeSelector = Vector2.new(1, 0.2)
+local activeSizeSelector = Vector2.new(0.8, 0.1)
+local targetSizeSelector = source(baseSizeSelector)
+
+local basePositionFrame = Vector2.new(0.5, 0.5)
+local hiddenPositionFrame = Vector2.new(0.5, -0.5)
+local targetPositionFrame = source(hiddenPositionFrame)
+
+local basePositionRight = Vector2.new(0.85, 0.5)
+local hiddenPositionRight = Vector2.new(0.5, 0.5)
+local targetPositionRight = source(hiddenPositionFrame)
+
+local baseSizeRight = Vector2.new(0.175, 0.6)
+local hiddenSizeRight = Vector2.new(0.175, 0.4)
+local targetSizeRight = source(hiddenSizeRight)
+
 --selene: allow(unused_variable, unscoped_variables)
 app = root(function()
+	local animatedSizeOpener, setSpring = spring(targetSizeButton, 0.25, 0.75)
+	local animatedSizeSelector = spring(targetSizeSelector, 0.25, 0.75)
+
+	local animatedRightPosition = spring(targetPositionRight, 0.25, 0.6)
+	local animatedRightSize = spring(targetSizeRight, 0.25, 0.6)
+
+	effect(function()
+		if MenuOpen() and selectedAbility() ~= nil then
+			targetPositionRight(basePositionRight)
+			targetSizeRight(baseSizeRight)
+		else
+			targetPositionRight(hiddenPositionRight)
+			targetSizeRight(hiddenSizeRight)
+		end
+	end)
 	--selene: allow(mixed_table)
 	return ScreenGUI {
 		IgnoreGuiInset = true,
@@ -107,12 +145,22 @@ app = root(function()
 		Button {
 			Text = "",
 
-			Size = UDim2.fromScale(0.075, 0.15),
+			Size = function()
+				local v = animatedSizeOpener()
+				return UDim2.fromScale(v.X, v.Y)
+			end,
 			Position = UDim2.fromScale(0.05, 0.8),
 
 			AnchorPoint = Vector2.new(0.5, 0.5),
 
 			OnClick = function()
+				targetSizeButton(activeSizeButton)
+				setSpring { impulse = Vector2.new(0.15, 0.15) }
+
+				task.delay(0.12, function()
+					targetSizeButton(baseSizeButton)
+				end)
+
 				MenuOpen(not MenuOpen())
 				if UIState.isOpen("Abilities")() then
 					UIState.close("Abilities")
@@ -137,74 +185,148 @@ app = root(function()
 			end,
 		},
 
-		show(function()
-			return selectedAbility() ~= nil and MenuOpen()
-		end, function()
-			return Frame {
+		-- Right Gui
 
-				Position = UDim2.fromScale(0.85, 0.5),
-				Size = UDim2.fromScale(0.175, 0.6),
+		Frame {
+			Visible = function()
+				return MenuOpen() and selectedAbility() ~= nil
+			end,
+
+			Position = function()
+				local v = animatedRightPosition()
+
+				return UDim2.fromScale(v.X, v.Y)
+			end,
+
+			Size = function()
+				local v = animatedRightSize()
+
+				return UDim2.fromScale(v.X, v.Y)
+			end,
+
+			AnchorPoint = Vector2.new(0.5, 0.5),
+
+			BackgroundColor3 = Color3.new(math.random(), math.random(), math.random()),
+
+			TextLabel {
+				Text = function()
+					return selectedAbility() or ""
+				end,
+
+				TextScaled = true,
+				TextWrapped = true,
+
+				Size = UDim2.fromScale(1, 0.2),
+				Position = UDim2.fromScale(0.5, 0),
 
 				AnchorPoint = Vector2.new(0.5, 0.5),
 
-				BackgroundColor3 = Color3.new(math.random(), math.random(), math.random()),
+				BackgroundTransparency = 1,
+			},
 
-				TextLabel {
-					Text = function()
-						return selectedAbility() or ""
-					end,
+			Button {
+				Text = derive(function()
+					local pAbilities = playerAbilities()
+					local selected = selectedAbility()
 
-					TextScaled = true,
-					TextWrapped = true,
+					if not selected then
+						return ""
+					end
 
-					Size = UDim2.fromScale(1, 0.2),
-					Position = UDim2.fromScale(0.5, 0),
+					local ability = pAbilities[selected]
 
-					AnchorPoint = Vector2.new(0.5, 0.5),
+					if not ability then
+						return "Purchase"
+					end
 
-					BackgroundTransparency = 1,
-				},
+					if ability.Equipped then
+						return "Dequip"
+					end
 
-				Button {
-					Text = derive(function()
-						local pAbilities = playerAbilities()
-						local ability = pAbilities[selectedAbility()]
+					return "Equip"
+				end),
 
-						if not ability then
-							return "Purchase"
+				Size = function()
+					local v = animatedSizeSelector()
+
+					return UDim2.fromScale(v.X, v.Y)
+				end,
+
+				Position = UDim2.fromScale(0.5, 0.8),
+
+				AnchorPoint = Vector2.new(0.5, 0.5),
+
+				TextScaled = true,
+				TextWrapped = true,
+
+				BackgroundTransparency = 0,
+				BackgroundColor3 = function()
+					local pAbilities = playerAbilities()
+					local selected = selectedAbility()
+
+					local ability = pAbilities[selected]
+
+					local ab = AbilitysConfig[selectedAbility()]
+					if not ab then
+						return Color3.fromRGB(0, 0, 0)
+					end
+
+					if not ability then
+						if data.currency.Coins() >= ab.Cost then
+							return Color3.fromRGB(0, 255, 42)
 						end
+						return Color3.fromRGB(255, 0, 0)
+					end
 
-						if ability.Equipped then
-							return "Dequip"
-						end
+					if ability.Equipped then
+						return Color3.fromRGB(255, 0, 0)
+					end
 
-						return "Equip"
-					end),
+					return Color3.fromRGB(0, 255, 26)
+				end,
 
-					Size = UDim2.fromScale(1, 0.2),
-					Position = UDim2.fromScale(0.5, 0.8),
+				OnClick = function()
+					targetSizeSelector(activeSizeSelector)
+					setSpring { impulse = Vector2.new(0.15, 0.15) }
 
-					AnchorPoint = Vector2.new(0.5, 0.5),
+					task.delay(0.12, function()
+						targetSizeSelector(baseSizeSelector)
+					end)
 
-					TextScaled = true,
+					local currentAbilities = playerAbilities()
+					local selected = selectedAbility()
 
-					OnClick = function()
-						local currentAbilities = playerAbilities()
-						local selected = selectedAbility()
+					if not selected then
+						return
+					end
 
-						if currentAbilities[selected] then
-							Packets.EquipAbility:Fire(selected)
-						else
-							Packets.PurchaseAbility:Fire(selected)
-						end
-					end,
-				},
-			}
-		end),
+					if currentAbilities[selected] then
+						Packets.EquipAbility:Fire(selected)
+					else
+						Packets.PurchaseAbility:Fire(selected)
+					end
+				end,
+			},
+		},
 
 		show(MenuOpen, function()
+			local animatedPosition, setSpring = spring(targetPositionFrame, 0.25, 0.6)
+
+			effect(function()
+				if MenuOpen() then
+					targetPositionFrame(basePositionFrame)
+				else
+					targetPositionFrame(hiddenPositionFrame)
+				end
+			end)
+
 			return Frame {
-				Position = UDim2.fromScale(0.5, 0.5),
+				Position = function()
+					local position = animatedPosition()
+
+					return UDim2.fromScale(position.X, position.Y)
+				end,
+
 				Size = UDim2.fromScale(0.5, 0.5),
 
 				AnchorPoint = Vector2.new(0.5, 0.5),

@@ -1,40 +1,35 @@
-local TweenService = game:GetService "TweenService"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-export type TweenGoals = { [string]: any }
+local vide = require(ReplicatedStorage.Packages.vide)
 
 export type PressConfig = {
 	instance: GuiObject,
-	pressGoals: TweenGoals?,
-	hoverGoals: TweenGoals?,
-	idleGoals: TweenGoals?,
-	tweenInfo: TweenInfo?,
+	pressGoals: UDim2?,
+	hoverGoals: UDim2?,
+	idleGoals: UDim2?,
+	speed: number?,
+	damping: number?,
 }
 
-local DEFAULT_TWEEN_INFO = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local source = vide.source
+local spring = vide.spring
 
 local TweenPress = {}
 
-local function play(instance: GuiObject, tweenInfo: TweenInfo, goals: TweenGoals?)
-	if not goals then
-		return
-	end
-
-	local tween = TweenService:Create(instance, tweenInfo, goals)
-	tween:Play()
-	return tween
-end
-
 function TweenPress.attach(config: PressConfig): () -> ()
 	local instance = config.instance
-	local tweenInfo = config.tweenInfo or DEFAULT_TWEEN_INFO
 
-	local connections: { RBXScriptConnection } = {}
+	local targetSize = source(config.idleGoals or instance.Size)
+
+	local animatedSize = spring(targetSize, config.speed or 0.25, config.damping or 0.75)
+
+	local connections = {}
 
 	if config.pressGoals then
 		table.insert(
 			connections,
 			(instance :: any).Activated:Connect(function()
-				play(instance, tweenInfo, config.pressGoals)
+				targetSize(config.pressGoals)
 			end)
 		)
 	end
@@ -42,8 +37,8 @@ function TweenPress.attach(config: PressConfig): () -> ()
 	if config.hoverGoals then
 		table.insert(
 			connections,
-			(instance :: any).MouseEnter:Connect(function()
-				play(instance, tweenInfo, config.hoverGoals)
+			instance.MouseEnter:Connect(function()
+				targetSize(config.hoverGoals)
 			end)
 		)
 	end
@@ -51,22 +46,21 @@ function TweenPress.attach(config: PressConfig): () -> ()
 	if config.idleGoals then
 		table.insert(
 			connections,
-			(instance :: any).MouseLeave:Connect(function()
-				play(instance, tweenInfo, config.idleGoals)
+			instance.MouseLeave:Connect(function()
+				targetSize(config.idleGoals)
 			end)
 		)
 	end
 
-	return function()
+	local cleanup = function()
 		for _, connection in connections do
 			connection:Disconnect()
 		end
+
 		table.clear(connections)
 	end
-end
 
-function TweenPress.playOnce(instance: GuiObject, goals: TweenGoals, tweenInfo: TweenInfo?)
-	return play(instance, tweenInfo or DEFAULT_TWEEN_INFO, goals)
+	return cleanup, animatedSize
 end
 
 return TweenPress

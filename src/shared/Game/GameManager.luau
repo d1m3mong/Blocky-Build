@@ -145,6 +145,8 @@ function gameManager.rating(self: gameManager)
 	for _Entity, player: Player in world:query(playerRef) do
 		self:tpPlayersToGrid(player)
 
+		gameManagerSignals.ratePlayer:Fire(player)
+
 		--TODO: Promp Rate
 		task.wait(10)
 	end

@@ -116,7 +116,7 @@ function BlockPlacement:start(player: Player): ()
 		highlight.FillColor = Color3.fromRGB(255, 0, 22)
 		highlight.FillTransparency = 0.5
 		highlight.OutlineTransparency = 0
-		highlight.Parent = workspace
+		highlight.Parent = workspace:FindFirstChild("BlocksFolder" .. player.UserId)
 
 		playerTrove:Connect(RunService.RenderStepped, function()
 			local ray = workspace:Raycast(mouse.UnitRay.Origin, mouse.UnitRay.Direction * 1000, params)
