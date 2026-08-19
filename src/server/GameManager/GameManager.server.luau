@@ -71,34 +71,6 @@ gameManagerSignals.ratingStart:Connect(function()
 	end
 end)
 
-gameManagerSignals.ratePlayer:Connect(function(player: Player)
-	for _, plr in Players:GetPlayers() do
-		Packets.PrompPlayerRate:FireClient(plr, player)
-	end
-end)
-
-local votes = {}
-
-Packets.RatePlayer.OnServerEvent:Connect(function(player: Player, votedPlayer: Instance, stars: number)
-	if not votedPlayer or not votedPlayer:IsA("Player") then
-		return
-	end
-
-	if player == votedPlayer then
-		return
-	end
-
-	if stars > 5 or stars < 1 then
-		return
-	end
-
-	votes[votedPlayer] = votes[votedPlayer] or {}
-
-	votes[votedPlayer][player] = stars
-
-	print(stars)
-end)
-
 task.spawn(function(): ()
 	GameSingleton:intermission(VotingSingleton)
 end)

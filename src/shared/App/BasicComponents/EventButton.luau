@@ -6,16 +6,32 @@ local PropsType = require(ReplicatedStorage.Shared.App.PropsType)
 local create = vide.create
 local source = vide.source
 local spring = vide.spring
+local effect = vide.effect
+
+local function resolveSize(size: UDim2 | (() -> UDim2)): UDim2
+	if typeof(size) == "function" then
+		return (size :: () -> UDim2)()
+	end
+
+	return size :: UDim2
+end
 
 return function(props: PropsType.Props): TextButton
-	local baseSize = props.Size
-	local pressedSize = UDim2.fromScale(baseSize.X.Scale / 1.1, baseSize.Y.Scale / 1.1)
-
-	local targetSize = source(baseSize)
-
+	local pressFactor = source(1)
+	local targetSize = source(resolveSize(props.Size))
 	local animatedSize, setSpring = spring(targetSize, 0.25, 0.75)
 
-	local button = create "TextButton" {
+	effect(function()
+		local base = resolveSize(props.Size)
+		local factor = pressFactor()
+
+		targetSize(
+			UDim2.new(base.X.Scale * factor, base.X.Offset * factor, base.Y.Scale * factor, base.Y.Offset * factor)
+		)
+	end)
+
+	--selene: allow(mixed_table)
+	return create "TextButton" {
 		Size = function()
 			return animatedSize()
 		end,
@@ -32,14 +48,11 @@ return function(props: PropsType.Props): TextButton
 		Name = props.Name,
 
 		Activated = function()
-			targetSize(pressedSize)
-
-			setSpring {
-				impulse = Vector2.new(0.15, 0.15),
-			}
+			pressFactor(1 / 1.1)
+			setSpring({ impulse = Vector2.new(0.15, 0.15) })
 
 			task.delay(0.12, function()
-				targetSize(baseSize)
+				pressFactor(1)
 			end)
 
 			if props.OnClick then
@@ -48,19 +61,15 @@ return function(props: PropsType.Props): TextButton
 		end,
 
 		MouseEnter = function()
-			targetSize(pressedSize)
-
-			setSpring { impulse = Vector2.new(0.1, 0.1) }
+			pressFactor(1 / 1.1)
+			setSpring({ impulse = Vector2.new(0.1, 0.1) })
 		end,
 
 		MouseLeave = function()
-			targetSize(baseSize)
-
-			setSpring { impulse = Vector2.new(0.1, 0.1) }
+			pressFactor(1)
+			setSpring({ impulse = Vector2.new(0.1, 0.1) })
 		end,
 
 		table.unpack(props),
 	}
-
-	return button
 end

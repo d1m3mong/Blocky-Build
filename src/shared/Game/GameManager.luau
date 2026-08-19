@@ -30,6 +30,7 @@ function gameManager.new(): typeof(setmetatable({}, gameManager))
 
 	self.gameState = "intermission"
 	self.signal = signal.new()
+	self.votes = {}
 
 	return self
 end
@@ -47,6 +48,7 @@ function gameManager.startGame(self: gameManager)
 	end
 
 	gameManagerSignals.gameStart:Fire()
+	table.clear(self.votes)
 
 	for _, player in Players:GetPlayers() do
 		print(player.UserId, " game has been initialized!")
@@ -142,14 +144,45 @@ function gameManager.rating(self: gameManager)
 
 	gameManagerSignals.ratingStart:Fire()
 
-	for _Entity, player: Player in world:query(playerRef) do
+	local connection
+
+	connection = Packets.RatePlayer.OnServerEvent:Connect(
+		function(ownPlayer: Player, votedPlayer: Instance, stars: number)
+			if self.gameState ~= "rating" then
+				return
+			end
+
+			if not votedPlayer:IsA("Player") then
+				return
+			end
+
+			if ownPlayer == votedPlayer then
+				--return
+			end
+
+			if stars < 1 or stars > 5 then
+				return
+			end
+
+			self.votes[votedPlayer.UserId] = self.votes[votedPlayer.UserId] or {}
+
+			self.votes[votedPlayer.UserId][ownPlayer.UserId] = stars
+
+			print(ownPlayer.Name, "rated", votedPlayer.Name, "with", stars)
+		end
+	)
+
+	for _Entity, player in world:query(playerRef) do
 		self:tpPlayersToGrid(player)
 
-		gameManagerSignals.ratePlayer:Fire(player)
+		for _, plr in Players:GetPlayers() do
+			Packets.PrompPlayerRate:FireClient(plr, player)
+		end
 
-		--TODO: Promp Rate
 		task.wait(10)
 	end
+
+	connection:Disconnect()
 
 	self:result()
 end
@@ -162,6 +195,8 @@ function gameManager.result(self: gameManager)
 	print "RESULT"
 
 	self.gameState = "result"
+
+	print(self.votes)
 
 	task.wait(5)
 
