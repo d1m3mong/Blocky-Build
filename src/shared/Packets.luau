@@ -13,6 +13,7 @@ return {
 
 	PlaceBlock = packet("Placeblock", { Position = packet.Vector3S16, Id = packet.String }),
 	DeleteBlock = packet("Deleteblock", { instance = packet.Instance, Position = packet.Vector3S16 }),
+	ScaleBlock = packet("Scaleblock", packet.Instance),
 
 	-- Timer
 

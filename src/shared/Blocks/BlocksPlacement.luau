@@ -16,6 +16,7 @@ local BlocksList = require(script.Parent.BlocksList)
 type Block = BlockTypes.Block
 
 local Trove = require(ReplicatedStorage.Packages.trove)
+local Packets = require(ReplicatedStorage.Shared.Packets)
 local DeletionModeSignal = require(ReplicatedStorage.Shared.Signals.DeletionModeSignal)
 
 local BlockPlacement = {}
@@ -53,6 +54,11 @@ local function isPlacedBlock(target: Instance): boolean
 		and parent:IsA("Folder")
 		and string.match(parent.Name, "^BlocksFolder%d+$") ~= nil
 end
+
+const valid = Color3.fromRGB(56, 255, 1)
+const invalid = Color3.fromRGB(255, 2, 2)
+
+local lastValid: boolean? = nil
 
 function BlockPlacement:start(player: Player): ()
 	if RunService:IsServer() then
@@ -109,6 +115,9 @@ function BlockPlacement:start(player: Player): ()
 	self.trove[player.UserId] = playerTrove
 
 	print(isDeleting)
+	local overlap = OverlapParams.new()
+	overlap.FilterType = Enum.RaycastFilterType.Exclude
+	overlap.FilterDescendantsInstances = { player.Character }
 
 	if isDeleting then
 		local highlight = playerTrove:Add(Instance.new("Highlight"))
@@ -133,7 +142,7 @@ function BlockPlacement:start(player: Player): ()
 
 	local block = playerTrove:Add(Instance.new("Part")) :: Part
 
-	block.Size = Vector3.new(5, 5, 5)
+	block.Size = Vector3.new(4.999, 4.999, 4.999)
 	block.Anchored = true
 	block.CanCollide = false
 	block.CanQuery = false
@@ -141,7 +150,7 @@ function BlockPlacement:start(player: Player): ()
 	block.Transparency = 0.5
 	block.Parent = workspace
 
-	local alpha = 0
+	local alpha
 
 	playerTrove:Connect(RunService.RenderStepped, function(dt: number)
 		local ray = workspace:Raycast(mouse.UnitRay.Origin, mouse.UnitRay.Direction * 1000, params)
@@ -153,6 +162,16 @@ function BlockPlacement:start(player: Player): ()
 		local position = ray.Position + ray.Normal * (block.Size.Y / 2)
 
 		local goal = Vector3.new(snapToGrid(position.X, 5), snapToGrid(position.Y, 5), snapToGrid(position.Z, 5))
+		local targetCFrame = CFrame.new(goal)
+
+		local inbound = workspace:GetPartBoundsInBox(targetCFrame, block.Size, overlap)
+
+		local isValid = #inbound == 0
+
+		if isValid ~= lastValid then
+			block.Color = if isValid then valid else invalid
+			lastValid = isValid
+		end
 
 		alpha = math.clamp(speed * dt, 0, 1)
 
@@ -166,27 +185,34 @@ function BlockPlacement:Place(Block: Block, player: Player)
 	end
 
 	local blockFolder = workspace:FindFirstChild("BlocksFolder" .. player.UserId)
+
 	if not blockFolder then
 		blockFolder = Instance.new("Folder")
 		blockFolder.Name = "BlocksFolder" .. player.UserId
-
 		blockFolder.Parent = workspace
 	end
 
+	local overlap = OverlapParams.new()
+	overlap.FilterType = Enum.RaycastFilterType.Include
+	overlap.FilterDescendantsInstances = { blockFolder }
+
+	local inbound = workspace:GetPartBoundsInBox(CFrame.new(Block.Position), Vector3.new(4.9, 4.9, 4.9), overlap, 1)
+
+	if #inbound > 0 then
+		return
+	end
+
 	local block = Instance.new("Part")
+
 	block.Color = BlocksList.BlockList[Block.Id].Color or Color3.fromRGB(177, 170, 170)
+
 	block.Position = Block.Position
 	block.Size = Vector3.new(5, 5, 5)
-
 	block.Anchored = true
 
 	block.Parent = blockFolder
 
 	CollectionService:AddTag(block, "PlacedBlock")
-
-	if Block.OnPlace then
-		Block.OnPlace()
-	end
 
 	local Entity = world:entity()
 
@@ -195,6 +221,8 @@ function BlockPlacement:Place(Block: Block, player: Player)
 	world:set(Entity, data, Block.data)
 	world:set(Entity, id, Block.Id)
 	world:set(Entity, owner, player.UserId)
+
+	Packets.ScaleBlock:FireClient(player, block)
 end
 
 return BlockPlacement

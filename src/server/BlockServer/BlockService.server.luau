@@ -58,7 +58,7 @@ Packets.PlaceBlock.OnServerEvent:Connect(function(player: Player, data: { Vector
 
 	local gameState = GameSingleton:getGameState()
 	if gameState ~= "started" then
-		return
+		--return
 	end
 
 	BlocksPlacement:Place(block, player)

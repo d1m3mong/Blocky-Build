@@ -37,7 +37,7 @@ function Grid:setupGrid(player: Player, part: Part): grid
 
 	for i = 0, gridSize - 1 do
 		for j = 0, gridSize - 1 do
-			local position = part.Position + Vector3.new((i - offset) * tileSize, 1, (j - offset) * tileSize)
+			local position = part.Position + Vector3.new((i - offset) * tileSize, 2, (j - offset) * tileSize)
 
 			table.insert(t, createPart(position, i - j, folder))
 		end

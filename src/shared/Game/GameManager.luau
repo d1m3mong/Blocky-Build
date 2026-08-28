@@ -184,6 +184,10 @@ function gameManager.rating(self: gameManager)
 
 	connection:Disconnect()
 
+	for _, plr in Players:GetPlayers() do
+		Packets.PrompRate:FireClient(plr, false)
+	end
+
 	self:result()
 end
 

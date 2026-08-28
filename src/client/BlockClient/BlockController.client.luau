@@ -1,9 +1,11 @@
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local networker = require(ReplicatedStorage.Packages.networker).client
 local jecs = require(ReplicatedStorage.Packages.jecs)
+local ripple = require(ReplicatedStorage.Packages.ripple)
 local trove = require(ReplicatedStorage.Packages.trove)
 local BlocksList = require(ReplicatedStorage.Shared.Blocks.BlocksList)
 local BlocksPlacement = require(ReplicatedStorage.Shared.Blocks.BlocksPlacement)
@@ -100,4 +102,23 @@ t = UserInputService.InputBegan:Connect(function(input: InputObject, gpe: boolea
 
 		Packets.PlaceBlock:Fire(data)
 	end
+end)
+
+CollectionService:GetInstanceAddedSignal("PlacedBlock"):Connect(function(block)
+	if not block:IsA("Part") then
+		return
+	end
+
+	local originalSize = block.Size
+
+	block.Size = Vector3.zero
+
+	local spring = ripple.createSpring(block.Size, { frequency = 4, dampingRatio = 1 })
+
+	spring:setGoal(originalSize)
+	spring:start()
+
+	spring:onChange(function(value, dt)
+		block.Size = value
+	end)
 end)

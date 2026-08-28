@@ -1,10 +1,5 @@
-local ActivityHistoryEventService = game:GetService("ActivityHistoryEventService")
-local DebuggerUIService = game:GetService("DebuggerUIService")
-local ExampleV2Service = game:GetService("ExampleV2Service")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local VisibilityCheckDispatcher = game:GetService("VisibilityCheckDispatcher")
-local packet = require(ReplicatedStorage.Packages.packet)
 local vide = require(ReplicatedStorage.Packages.vide)
 local Button = require(ReplicatedStorage.Shared.App.BasicComponents.Button)
 local EventButton = require(ReplicatedStorage.Shared.App.BasicComponents.EventButton)
@@ -18,7 +13,6 @@ local UIStroke = require(ReplicatedStorage.Shared.App.BasicComponents.UIStroke)
 local UIState = require(ReplicatedStorage.Shared.App.Util.UIState)
 local AbilitysConfig = require(ReplicatedStorage.Shared.Game.AbilitysConfig)
 local Packets = require(ReplicatedStorage.Shared.Packets)
-local data = require(ReplicatedStorage.Shared.data)
 local data = require(ReplicatedStorage.Shared.data).client
 
 local player = Players.LocalPlayer
@@ -31,8 +25,10 @@ local indexes = vide.indexes
 local derive = vide.derive
 local spring = vide.spring
 
+type Source<T> = typeof(vide.source(nil :: T))
+
 local MenuOpen = source(false)
-local abilities = source(AbilitysConfig) :: vide.Source<AbilitysConfig.AbilitiesType>
+local abilities = source(AbilitysConfig) :: Source<AbilitysConfig.AbilitiesType>
 local selectedAbility = source(nil)
 local playerAbilities = source(data.Abilities())
 
