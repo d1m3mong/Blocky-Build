@@ -1,8 +1,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VotingManager = require(script.Parent.VotingManager)
+local WinnerTable = require(script.Parent.WinnerTable)
 local jecs = require(ReplicatedStorage.Packages.jecs)
 local packet = require(ReplicatedStorage.Packages.packet)
+local sift = require(ReplicatedStorage.Packages.sift)
 local signal = require(ReplicatedStorage.Packages.signal)
 local trove = require(ReplicatedStorage.Packages.trove)
 local BlocksManager = require(ReplicatedStorage.Shared.Blocks.BlocksManager)
@@ -10,6 +12,7 @@ local Packets = require(ReplicatedStorage.Shared.Packets)
 local Ecs = require(ReplicatedStorage.Shared.Ecs.World)
 local gameManagerSignals = require(ReplicatedStorage.Shared.Signals.gameManagerSignals)
 local VotingSingleton = require(ReplicatedStorage.Shared.VotingSingleton)
+local data = require(ReplicatedStorage.Shared.data).server
 
 local world = Ecs.world
 local isInGame = Ecs.isInGame
@@ -22,6 +25,8 @@ gameManager.__index = gameManager
 
 export type gameManager = typeof(gameManager.new()) & {
 	gameState: string,
+	signal: any,
+	votes: {},
 }
 
 function gameManager.new(): typeof(setmetatable({}, gameManager))
@@ -191,6 +196,55 @@ function gameManager.rating(self: gameManager)
 	self:result()
 end
 
+type VoteEntry = {
+	UserId: number,
+	Votes: number,
+}
+
+local function sortPlayersByVotes(self: gameManager): { VoteEntry }
+	print("MY USER ID:", Players:GetPlayers()[1].UserId)
+	print("VOTES:")
+
+	local sorted: { VoteEntry } = {}
+
+	for userId, votes in self.votes do
+		local totalVotes = 0
+
+		print("KEY:", userId)
+		print("VALUE:", votes)
+
+		for target, vote in votes do
+			print("  TARGET:", target, "VOTE:", vote)
+
+			totalVotes += vote
+		end
+
+		sorted = sift.List.push(sorted, {
+			UserId = userId,
+			Votes = totalVotes,
+		})
+	end
+
+	table.sort(sorted, function(a, b)
+		return a.Votes > b.Votes
+	end)
+
+	return sorted
+end
+
+local function nominate(sortedList: { { number } }): { VoteEntry }
+	local nominated = {}
+
+	for i = 1, #sortedList do
+		nominated = sift.List.push(nominated, {
+			UserId = sortedList[i].UserId,
+			Votes = sortedList[i].Votes,
+		})
+	end
+
+	return nominated
+end
+
 function gameManager.result(self: gameManager)
 	if self.gameState ~= "rating" then
 		return
@@ -200,9 +254,63 @@ function gameManager.result(self: gameManager)
 
 	self.gameState = "result"
 
-	print(self.votes)
+	local sortedList = sortPlayersByVotes(self)
+
+	for _, playerData in sortedList do
+		local success, playerInstance: Player? = pcall(Players.GetPlayerByUserId, Players, playerData.UserId)
+		if not success then
+			warn("[GameManager]: Pcall to optain the Player Instance Failed" .. success)
+			continue
+		end
+
+		if playerInstance then
+			data[playerInstance].Votes(function(Old: number)
+				return Old + playerData.Votes
+			end)
+		end
+	end
+
+	local nominatedPlayers: { VoteEntry } = nominate(sortedList)
+
+	print(nominatedPlayers)
+
+	for _, player in Players:GetPlayers() do
+		Packets.ReplicateNominations:FireClient(player, nominatedPlayers)
+		Packets.ResultState:FireClient(player, true)
+	end
+
+	for i = 1, #nominatedPlayers do
+		local userId = nominatedPlayers[i].UserId
+
+		if not userId then
+			warn("[GameManager]: Couldnt identify Player data NominatedList!")
+			continue
+		end
+
+		local success, playerInstance: Player? = pcall(Players.GetPlayerByUserId, Players, userId)
+		if not success then
+			warn("[GameManager]: Pcall to optain the Player Instance Failed" .. success)
+			continue
+		end
+
+		if playerInstance then
+			data[playerInstance].currency.Coins(function(Old: number)
+				return Old + WinnerTable[i].Reward.Coins
+			end)
+
+			data[playerInstance].currency.Wins(function(Old: number)
+				return Old + WinnerTable[i].Reward.Wins
+			end)
+		end
+
+		print(playerInstance)
+	end
 
 	task.wait(5)
+
+	for _, player in Players:GetPlayers() do
+		Packets.ResultState:FireClient(player, false)
+	end
 
 	self:intermission(VotingSingleton)
 end

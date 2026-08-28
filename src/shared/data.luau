@@ -3,9 +3,11 @@ local dataservicetyped = require(ReplicatedStorage.Packages.dataservicetyped)
 
 local template = {
 	currency = {
-		Coins = 1000,
+		Coins = 0,
 		Wins = 0,
 	},
+
+	Votes = 0,
 
 	firstJoined = nil,
 	lastLeft = nil,

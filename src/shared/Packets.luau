@@ -8,6 +8,7 @@ local payload = {
 	Difficulty = packet.NumberU8,
 }
 
+--selene: allow(mixed_table)
 return {
 	-- Blocks
 
@@ -42,4 +43,9 @@ return {
 	PrompRate = packet("PrompRate", packet.Boolean8),
 	PrompPlayerRate = packet("PrompPlayerRate", packet.Instance),
 	RatePlayer = packet("Rate", packet.Instance, packet.NumberU8),
+
+	-- Results
+
+	ReplicateNominations = packet("ReplicateNominations", { { UserId = packet.NumberF64, Votes = packet.NumberU8 } }),
+	ResultState = packet("ResultState", packet.Boolean8),
 }

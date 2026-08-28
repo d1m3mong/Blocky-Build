@@ -20,13 +20,13 @@ const blockSize = Vector3.new(5, 5, 5)
 
 local t = trove.new()
 
-local function determinBlockPosition()
+local function determinBlockPosition(): Vector3?
 	local mouse = player:GetMouse()
 
 	local ray = workspace:Raycast(mouse.UnitRay.Origin, mouse.UnitRay.Direction * 1000)
 
 	if not ray then
-		return
+		return nil
 	end
 
 	local position = ray.Position + ray.Normal * (blockSize.Y / 2)
@@ -97,7 +97,12 @@ t = UserInputService.InputBegan:Connect(function(input: InputObject, gpe: boolea
 			return
 		end
 
-		data.Position = determinBlockPosition()
+		local pos: Vector3 = determinBlockPosition()
+		if not pos then
+			return
+		end
+
+		data.Position = pos
 		data.Id = selectedBlock
 
 		Packets.PlaceBlock:Fire(data)

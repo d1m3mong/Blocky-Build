@@ -1,7 +1,8 @@
+local ExampleV2Service = game:GetService("ExampleV2Service")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StudioScriptDebugEventListener = game:GetService("StudioScriptDebugEventListener")
 local vide = require(ReplicatedStorage.Packages.vide)
+local vide_ripple = require(ReplicatedStorage.Packages["vide-ripple"])
 local EventButton = require(ReplicatedStorage.Shared.App.BasicComponents.EventButton)
 local Frame = require(ReplicatedStorage.Shared.App.BasicComponents.Frame)
 local ImageLabel = require(ReplicatedStorage.Shared.App.BasicComponents.ImageLabel)
@@ -17,18 +18,28 @@ local spring = vide.spring
 local root = vide.root
 local effect = vide.effect
 local indexes = vide.indexes
+local show = vide.show
 
 local finalFramePosition = Vector2.new(0.7, 0.5)
 local hiddenFramePosition = Vector2.new(1.2, 0.5)
 
+local finalResultPosition = Vector2.new(0.5, 0.5)
+local hiddenResultPosition = Vector2.new(0.5, 1.5)
+
 local ratingOngoing = source(false)
 local targetFramePopup = source(finalFramePosition)
+local targetResultPopup = source(hiddenFramePosition)
 local currentlyRating = source(nil)
 
 local stars = source({ 1, 2, 3, 4, 5 })
 local selected = source(0)
 
 local buttons = source({})
+
+type ratingEntry = {
+	UserId: number,
+	Votes: number,
+}
 
 local function createStars(key: number)
 	return EventButton {
@@ -58,6 +69,39 @@ local function createStars(key: number)
 	}
 end
 
+local function createNominee(entry: ratingEntry)
+	print(entry)
+
+	--selene: allow(mixed_table)
+	return Frame {
+		Size = UDim2.fromScale(1, 0.3),
+
+		BackgroundTransparency = 0,
+
+		TextLabel {
+			Size = UDim2.fromScale(0.8, 0.3),
+			Position = UDim2.fromScale(0.5, 0.2),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+
+			Text = tostring(entry.UserId),
+
+			TextScaled = true,
+			BackgroundTransparency = 1,
+		},
+
+		TextLabel {
+			Size = UDim2.fromScale(0.8, 0.3),
+			Position = UDim2.fromScale(0.5, 0.7),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+
+			Text = tostring(entry.Votes),
+
+			TextScaled = true,
+			BackgroundTransparency = 1,
+		},
+	}
+end
+
 Packets.PrompRate.OnClientEvent:Connect(function(state: boolean)
 	ratingOngoing(state)
 end)
@@ -68,14 +112,43 @@ Packets.PrompPlayerRate.OnClientEvent:Connect(function(plr: Player)
 	currentlyRating(plr)
 end)
 
+local nomineesList = {
+	source(nil),
+	source(nil),
+	source(nil),
+} :: { () -> ratingEntry? }
+
+Packets.ReplicateNominations.OnClientEvent:Connect(function(nominees: { ratingEntry })
+	for i, nomineesSource in nomineesList do
+		nomineesSource(nominees[i])
+	end
+end)
+
+local resultState: () -> boolean = source(false)
+
+Packets.ResultState.OnClientEvent:Connect(function(state)
+	resultState(state)
+end)
+
 root(function()
-	local animatedFramePopup, setSpring = spring(targetFramePopup, 0.25, 0.45)
+	local animatedFramePopup, _ = spring(targetFramePopup, 0.25, 0.45)
+	local animatedResultPopup, setSpring = spring(targetResultPopup, 0.4, 0.45)
 
 	effect(function()
-		if ratingOngoing() == true then
+		-- Rating
+		if ratingOngoing() then
 			targetFramePopup(finalFramePosition)
 		else
 			targetFramePopup(hiddenFramePosition)
+		end
+
+		-- Results
+		local hasResults = nomineesList[1]() ~= nil
+
+		if resultState() and hasResults then
+			targetResultPopup(finalResultPosition)
+		else
+			targetResultPopup(hiddenResultPosition)
 		end
 	end)
 
@@ -99,7 +172,7 @@ root(function()
 
 			TextLabel {
 				Position = UDim2.fromScale(0.5, 0.1),
-				Size = UDim2.fromScale(1 / 5, 0.15),
+				Size = UDim2.fromScale(1, 0.25),
 
 				AnchorPoint = Vector2.new(0.5, 0.5),
 
@@ -119,7 +192,7 @@ root(function()
 			},
 
 			ImageLabel {
-				Position = UDim2.fromScale(0.5, 0.25),
+				Position = UDim2.fromScale(0.5, 0.3),
 				Size = UDim2.fromScale(1 / 4, 1 / 4),
 
 				AnchorPoint = Vector2.new(0.5, 0.5),
@@ -169,6 +242,43 @@ root(function()
 					return starButton
 				end),
 			},
+		},
+
+		Frame {
+			--selene: allow(mixed_table)
+
+			Position = function()
+				local v = animatedResultPopup()
+
+				return UDim2.fromScale(v.X, v.Y)
+			end,
+
+			Size = UDim2.fromScale(0.3, 0.8),
+
+			AnchorPoint = Vector2.new(0.5, 0.5),
+
+			UIListLayout {
+				FillDirection = Enum.FillDirection.Vertical,
+				VerticalAlignment = Enum.VerticalAlignment.Top,
+			},
+
+			show(function()
+				return nomineesList[1]() ~= nil
+			end, function()
+				return createNominee(nomineesList[1]())
+			end),
+
+			show(function()
+				return nomineesList[2]() ~= nil
+			end, function()
+				return createNominee(nomineesList[2]())
+			end),
+
+			show(function()
+				return nomineesList[3]() ~= nil
+			end, function()
+				return createNominee(nomineesList[3]())
+			end),
 		},
 	}
 end)
