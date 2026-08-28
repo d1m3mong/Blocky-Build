@@ -196,7 +196,7 @@ function BlockPlacement:Place(Block: Block, player: Player)
 	overlap.FilterType = Enum.RaycastFilterType.Include
 	overlap.FilterDescendantsInstances = { blockFolder }
 
-	local inbound = workspace:GetPartBoundsInBox(CFrame.new(Block.Position), Vector3.new(4.9, 4.9, 4.9), overlap, 1)
+	local inbound = workspace:GetPartBoundsInBox(CFrame.new(Block.Position), Vector3.new(4.9, 4.9, 4.9), overlap)
 
 	if #inbound > 0 then
 		return
