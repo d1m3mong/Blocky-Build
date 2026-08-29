@@ -46,6 +46,7 @@ return {
 
 	-- Results
 
+	ShowWinners = packet("ShowWinners", { { UserId = packet.NumberF64, Votes = packet.NumberU8 } }),
 	ReplicateNominations = packet("ReplicateNominations", { { UserId = packet.NumberF64, Votes = packet.NumberU8 } }),
 	ResultState = packet("ResultState", packet.Boolean8),
 }

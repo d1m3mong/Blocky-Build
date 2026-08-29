@@ -56,6 +56,14 @@ export type Props = {
 	ImageRectOffset: Vector2?,
 	ImageRectSize: Vector2?,
 
+	--// ScrollingFrame
+
+	AutomaticCanvasSize: Enum.AutomaticSize?,
+	CanvasSize: UDim2?,
+	ScrollingThickness: UDim?,
+	ScrollBarImageColor3: Color3?,
+	ScrollBarImageTransparency: number?,
+
 	--// UIAspectRatioConstraint
 	AspectRatio: number?,
 	AspectType: Enum.AspectType?,

@@ -202,20 +202,12 @@ type VoteEntry = {
 }
 
 local function sortPlayersByVotes(self: gameManager): { VoteEntry }
-	print("MY USER ID:", Players:GetPlayers()[1].UserId)
-	print("VOTES:")
-
 	local sorted: { VoteEntry } = {}
 
 	for userId, votes in self.votes do
 		local totalVotes = 0
 
-		print("KEY:", userId)
-		print("VALUE:", votes)
-
 		for target, vote in votes do
-			print("  TARGET:", target, "VOTE:", vote)
-
 			totalVotes += vote
 		end
 
@@ -274,9 +266,21 @@ function gameManager.result(self: gameManager)
 
 	print(nominatedPlayers)
 
+	local winnersData = {}
+	for i = 1, #nominatedPlayers do
+		winnersData = sift.List.push(winnersData, {
+			UserId = nominatedPlayers[i].UserId,
+			Votes = nominatedPlayers[i].Votes,
+		})
+	end
+
 	for _, player in Players:GetPlayers() do
-		Packets.ReplicateNominations:FireClient(player, nominatedPlayers)
-		Packets.ResultState:FireClient(player, true)
+		Packets.ShowWinners:FireClient(player, winnersData)
+
+		task.delay(6, function()
+			Packets.ReplicateNominations:FireClient(player, nominatedPlayers)
+			Packets.ResultState:FireClient(player, true)
+		end)
 	end
 
 	for i = 1, #nominatedPlayers do
@@ -306,7 +310,7 @@ function gameManager.result(self: gameManager)
 		print(playerInstance)
 	end
 
-	task.wait(5)
+	task.wait(15)
 
 	for _, player in Players:GetPlayers() do
 		Packets.ResultState:FireClient(player, false)
