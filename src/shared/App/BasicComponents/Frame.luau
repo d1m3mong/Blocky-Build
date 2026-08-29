@@ -19,6 +19,8 @@ return function(props: PropsType.Props)
 		Visible = props.Visible,
 		ZIndex = props.ZIndex,
 
+		Rotation = props.Rotation,
+
 		Name = props.Name,
 
 		table.unpack(props),

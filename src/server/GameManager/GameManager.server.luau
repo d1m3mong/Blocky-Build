@@ -8,6 +8,7 @@ local GameSingleton = require(ReplicatedStorage.Shared.GameSingleton)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local gameManagerSignals = require(ReplicatedStorage.Shared.Signals.gameManagerSignals)
 local VotingSingleton = require(ReplicatedStorage.Shared.VotingSingleton)
+local data = require(ReplicatedStorage.Shared.data).server
 
 local world = Ecs.world
 local owner = Ecs.owner

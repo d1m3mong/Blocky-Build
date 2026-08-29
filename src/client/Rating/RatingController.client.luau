@@ -85,7 +85,7 @@ local function createNominee(entry: ratingEntry)
 		ImageLabel {
 			Position = UDim2.fromScale(0.15, 0.2),
 
-			Size = UDim2.fromScale(0.25, 0.55),
+			Size = UDim2.fromScale(0.2, 0.55),
 
 			BackgroundTransparency = 1,
 			AnchorPoint = Vector2.new(0.5, 0.5),

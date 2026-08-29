@@ -19,8 +19,14 @@ return function(props: PropsType.Props): UICorner
 		TextColor3 = props.TextColor3,
 
 		TextScaled = props.TextScaled,
+		TextTransparency = props.TextTransparency,
 
 		Visible = props.Visible,
+
+		TextXAlignment = props.TextXAlignment,
+		TextYAlignment = props.TextYAlignment,
+
+		Rotation = props.Rotation,
 
 		table.unpack(props),
 	}
