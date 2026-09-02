@@ -16,9 +16,10 @@ return {
 	DeleteBlock = packet("Deleteblock", { instance = packet.Instance, Position = packet.Vector3S16 }),
 	ScaleBlock = packet("Scaleblock", packet.Instance),
 
-	-- Timer
+	-- GameManager
 
 	UpdateTimer = packet("UpdateTimer", packet.NumberU16),
+	UpdateGameState = packet("UpdateGameState", packet.String),
 
 	-- Voting
 

@@ -58,6 +58,7 @@ function gameManager.startGame(self: gameManager)
 	for _, player in Players:GetPlayers() do
 		print(player.UserId, " game has been initialized!")
 
+		Packets.UpdateGameState:FireClient(player, "started")
 		BlocksManager:clearBlocks(player)
 
 		local entity = world:entity()
@@ -148,6 +149,10 @@ function gameManager.rating(self: gameManager)
 	self.gameState = "rating"
 
 	gameManagerSignals.ratingStart:Fire()
+
+	for _, player in Players:GetPlayers() do
+		Packets.UpdateGameState:FireClient(player, "rating")
+	end
 
 	local connection
 
@@ -275,6 +280,7 @@ function gameManager.result(self: gameManager)
 	end
 
 	for _, player in Players:GetPlayers() do
+		Packets.UpdateGameState:FireClient(player, "result")
 		Packets.ShowWinners:FireClient(player, winnersData)
 
 		task.delay(6, function()
@@ -331,6 +337,7 @@ function gameManager.intermission(self: gameManager, votingManager: VotingManage
 	--TODO: Vote Theme
 	local winning = votingManager:startVote()
 	for _, plr: Player in Players:GetPlayers() do
+		Packets.UpdateGameState:FireClient(plr, "intermission")
 		Packets.GetWinningMapData:FireClient(plr, winning)
 	end
 

@@ -21,6 +21,7 @@ return function(props: PropsType.Props): TextButton
 		TextScaled = props.TextScaled,
 
 		Activated = props.OnClick,
+		Visible = props.Visible,
 
 		table.unpack(props),
 	}

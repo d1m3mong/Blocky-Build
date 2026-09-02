@@ -27,7 +27,7 @@ data.currency.Coins.Changed(function(newCoins)
 	playerCoins(newCoins)
 end)
 
-local initialPosition = Vector2.new(0.0075, 0.2)
+local initialPosition = Vector2.new(0.0075, 0.9)
 local ghostStartPosition = Vector2.new(initialPosition.X + 0.16, initialPosition.Y)
 
 local function ghostNumber(change: number, parent: Instance)

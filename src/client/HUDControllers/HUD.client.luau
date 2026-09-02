@@ -1,6 +1,8 @@
 local Players = game:GetService "Players"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local networker = require(ReplicatedStorage.Packages.networker)
+local packet = require(ReplicatedStorage.Packages.packet)
+local sift = require(ReplicatedStorage.Packages.sift)
 local signal = require(ReplicatedStorage.Packages.signal)
 local vide = require(ReplicatedStorage.Packages.vide)
 local Button = require(ReplicatedStorage.Shared.App.BasicComponents.Button)
@@ -9,7 +11,6 @@ local ScreenGUI = require(ReplicatedStorage.Shared.App.BasicComponents.ScreenGUI
 local TextLabel = require(ReplicatedStorage.Shared.App.BasicComponents.TextLabel)
 local UIState = require(ReplicatedStorage.Shared.App.Util.UIState)
 local Themes = require(ReplicatedStorage.Shared.Game.Themes)
-local VotingManager = require(ReplicatedStorage.Shared.Game.VotingManager)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local DeleteBlockSignal = require(ReplicatedStorage.Shared.Signals.DeleteBlockSignal)
 local DeletionModeSignal = require(ReplicatedStorage.Shared.Signals.DeletionModeSignal)
@@ -40,6 +41,27 @@ local basicSizeDelete = Vector2.new(1, 1)
 local activeSizeDelete = Vector2.new(0.8, 0.8)
 local targetSizeDelete = source(basicSizeDelete)
 
+local deletionKeyAllowed = source(false)
+
+local allowedList = {
+	"started",
+} :: sift.List<string>
+
+Packets.UpdateGameState.OnClientEvent:Connect(function(state: string)
+	for _index, allowed in allowedList do
+		if allowed ~= state then
+			continue
+		end
+
+		deletionKeyAllowed(true)
+		print "Found Needle in Haystack in 0.0121ms!"
+
+		return
+	end
+
+	deletionKeyAllowed(false)
+end)
+
 --selene: allow(unused_variable)
 local app = vide.root(function()
 	local animatedSizeDelete, setSpring = spring(targetSizeDelete, 0.25, 0.4)
@@ -52,7 +74,7 @@ local app = vide.root(function()
 		Parent = playerGui,
 
 		Frame {
-			Position = UDim2.fromScale(0.05, 0.5),
+			Position = UDim2.fromScale(0.7, 0.6),
 			Size = UDim2.fromScale(0.1, 0.2),
 
 			AnchorPoint = Vector2.new(0.5, 0.5),
@@ -60,6 +82,12 @@ local app = vide.root(function()
 			BackgroundTransparency = 1,
 
 			Color = Color3.fromRGB(255, 0, 155),
+
+			Visible = function()
+				print(deletionKeyAllowed())
+
+				return deletionKeyAllowed()
+			end,
 
 			Button {
 				Position = UDim2.fromScale(0.5, 0.5),

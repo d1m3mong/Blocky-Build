@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
+local jecs = require(ReplicatedStorage.Packages.jecs)
 local vide = require(ReplicatedStorage.Packages.vide)
 local Button = require(ReplicatedStorage.Shared.App.BasicComponents.Button)
 local EventButton = require(ReplicatedStorage.Shared.App.BasicComponents.EventButton)
@@ -11,6 +13,7 @@ local UIListLayout = require(ReplicatedStorage.Shared.App.BasicComponents.UIList
 local UIPadding = require(ReplicatedStorage.Shared.App.BasicComponents.UIPadding)
 local UIStroke = require(ReplicatedStorage.Shared.App.BasicComponents.UIStroke)
 local UIState = require(ReplicatedStorage.Shared.App.Util.UIState)
+local GuiWorld = require(ReplicatedStorage.Shared.Ecs.GuiWorld)
 local AbilitysConfig = require(ReplicatedStorage.Shared.Game.AbilitysConfig)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local data = require(ReplicatedStorage.Shared.data).client
@@ -25,10 +28,11 @@ local indexes = vide.indexes
 local derive = vide.derive
 local spring = vide.spring
 
-type Source<T> = typeof(vide.source(nil :: T))
+--type Source<T> = typeof(vide.source(nil :: T))
 
-local MenuOpen = source(false)
-local abilities = source(AbilitysConfig) :: Source<AbilitysConfig.AbilitiesType>
+local MenuOpen = source(false) -- Source<AbilitysConfig.AbilitiesType>
+local abilities = source(AbilitysConfig) :: vide.Source<AbilitysConfig.AbilitiesType>
+
 local selectedAbility = source(nil)
 local playerAbilities = source(data.Abilities())
 
@@ -112,6 +116,22 @@ local baseSizeRight = Vector2.new(0.175, 0.6)
 local hiddenSizeRight = Vector2.new(0.175, 0.4)
 local targetSizeRight = source(hiddenSizeRight)
 
+local world = GuiWorld.world
+local isOpen = GuiWorld.isOpen
+local abilitesEntity = GuiWorld.Guis.Abilities
+local resultEntity = GuiWorld.Guis.Result
+
+local isValid = source(false) :: vide.source<boolean>
+
+Packets.UpdateGameState.OnClientEvent:Connect(function(state: string)
+	if state == "started" then
+		isValid(true)
+		return
+	end
+
+	isValid(false)
+end)
+
 --selene: allow(unused_variable, unscoped_variables)
 app = root(function()
 	local animatedSizeOpener, setSpring = spring(targetSizeButton, 0.25, 0.75)
@@ -139,17 +159,20 @@ app = root(function()
 		--AbilityMenu Opener
 
 		Button {
+
 			Text = "",
 
 			Size = function()
 				local v = animatedSizeOpener()
 				return UDim2.fromScale(v.X, v.Y)
 			end,
-			Position = UDim2.fromScale(0.05, 0.8),
+			Position = UDim2.fromScale(0.05, 0.7),
 
 			AnchorPoint = Vector2.new(0.5, 0.5),
 
 			OnClick = function()
+				local opening = not MenuOpen()
+
 				targetSizeButton(activeSizeButton)
 				setSpring { impulse = Vector2.new(0.15, 0.15) }
 
@@ -157,7 +180,11 @@ app = root(function()
 					targetSizeButton(baseSizeButton)
 				end)
 
-				MenuOpen(not MenuOpen())
+				if not GuiWorld.trySetOpen(GuiWorld.Guis.Abilities, opening) then
+					return
+				end
+
+				MenuOpen(opening)
 				if UIState.isOpen("Abilities")() then
 					UIState.close("Abilities")
 				else
@@ -175,6 +202,12 @@ app = root(function()
 			Position = UDim2.fromScale(0.8, 0.65),
 
 			AnchorPoint = Vector2.new(0.5, 0.5),
+
+			Visible = function()
+				print(isValid())
+
+				return isValid()
+			end,
 
 			OnClick = function()
 				Packets.UseAbility:Fire()
