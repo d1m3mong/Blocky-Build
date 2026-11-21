@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local trove = require(ReplicatedStorage.Packages.trove)
+const CustomColors = require(ReplicatedStorage.Shared.Blocks.Blocks.CustomColors)
 local BlocksManager = require(ReplicatedStorage.Shared.Blocks.BlocksManager)
 local BlocksPlacement = require(ReplicatedStorage.Shared.Blocks.BlocksPlacement)
 local GameSingleton = require(ReplicatedStorage.Shared.GameSingleton)
@@ -25,6 +26,18 @@ local function snapToGrid(value: number, grid: number): number
 	return math.round(value / grid) * grid
 end
 
+local BlocksList = require(ReplicatedStorage.Shared.Blocks.BlocksList)
+
+local customColors: { [Player]: Color3 } = {}
+
+Packets.SetCustomColor.OnServerEvent:Connect(function(player: Player, r: number, g: number, b: number)
+	CustomColors.set(player, Color3.fromRGB(math.clamp(r, 0, 255), math.clamp(g, 0, 255), math.clamp(b, 0, 255)))
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	CustomColors.clear(player)
+end)
+
 Packets.PlaceBlock.OnServerEvent:Connect(function(player: Player, data: { Vector3 | string })
 	local grid = grids[player.UserId]
 	if not grid then
@@ -34,9 +47,9 @@ Packets.PlaceBlock.OnServerEvent:Connect(function(player: Player, data: { Vector
 
 	local block = {
 		Position = Vector3.new(
-			snapToGrid(data.Position.X, 5),
-			snapToGrid(data.Position.Y, 5),
-			snapToGrid(data.Position.Z, 5)
+			snapToGrid(data.Position.X, 3.5),
+			snapToGrid(data.Position.Y, 3.5),
+			snapToGrid(data.Position.Z, 3.5)
 		),
 		Id = data.Id,
 
@@ -53,6 +66,7 @@ Packets.PlaceBlock.OnServerEvent:Connect(function(player: Player, data: { Vector
 
 	local isOnGrid = Grid:shareSamePosition(grid, block.Position)
 	if not isOnGrid then
+		print "not grid"
 		return
 	end
 

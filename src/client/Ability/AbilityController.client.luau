@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
+const gameManagerClient = require(StarterPlayer.StarterPlayerScripts.Client.gameManagerClient)
 local jecs = require(ReplicatedStorage.Packages.jecs)
 local vide = require(ReplicatedStorage.Packages.vide)
 local Button = require(ReplicatedStorage.Shared.App.BasicComponents.Button)
@@ -17,6 +18,12 @@ local GuiWorld = require(ReplicatedStorage.Shared.Ecs.GuiWorld)
 local AbilitysConfig = require(ReplicatedStorage.Shared.Game.AbilitysConfig)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local data = require(ReplicatedStorage.Shared.data).client
+
+while game:IsLoaded() == false do
+	task.wait()
+end
+
+const GameSingleton = require(ReplicatedStorage.Shared.GameSingleton)
 
 local player = Players.LocalPlayer
 
@@ -190,6 +197,10 @@ app = root(function()
 				else
 					UIState.open("Abilities")
 				end
+			end,
+
+			Visible = function()
+				return gameManagerClient.getGameState() == "intermission" or not gameManagerClient.isInGame(player)
 			end,
 		},
 

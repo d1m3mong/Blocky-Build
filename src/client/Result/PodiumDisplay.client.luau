@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local SnippetService = game:GetService("SnippetService")
+const TweenService = game:GetService("TweenService")
 local troveModule = require(ReplicatedStorage.Packages.trove)
 local WinnerTable = require(ReplicatedStorage.Shared.Game.WinnerTable)
 local Packets = require(ReplicatedStorage.Shared.Packets)
@@ -175,6 +175,10 @@ local function showWinnerCharacter(
 	clone.Parent = workspace
 end
 
+local swooshIn = 0.35
+local swooshOut = 0.35
+local holdTime = 0.15
+
 Packets.ShowWinners.OnClientEvent:Connect(function(winnersData: winnersData)
 	if #winnersData <= 0 then
 		return
@@ -182,37 +186,70 @@ Packets.ShowWinners.OnClientEvent:Connect(function(winnersData: winnersData)
 
 	local eventTrove = troveModule.new()
 
-	local blocks = createPodium(winnersData, eventTrove)
+	local gui = eventTrove:Add(Instance.new("ScreenGui"))
+	gui.Name = "WinnerSwoosh"
+	gui.IgnoreGuiInset = true
+	gui.ResetOnSpawn = false
+	gui.DisplayOrder = 100
+	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
-	local startCFrame = camera.CFrame
+	local screen = gui.AbsoluteSize
+	local diagonal = screen.Magnitude
+	local side = diagonal * 2
+	local center = screen / 2
+	local direction = Vector2.new(-1, 1).Unit
 
-	local middleIndex = math.ceil(#blocks / 2)
-	local middlePart = blocks[middleIndex]
-
-	local focusPoint = middlePart.Position + Vector3.new(0, middlePart.Size.Y * 0.5, 0)
-
-	local cameraPos = focusPoint + cameraOffset
-
-	for i, playerData in winnersData do
-		showWinnerCharacter(playerData.UserId, i, blocks, eventTrove, cameraPos)
+	local function positionAt(offset: number): UDim2
+		local point = center + direction * offset
+		return UDim2.fromOffset(point.X, point.Y)
 	end
 
-	local targetCFrame = CFrame.lookAt(cameraPos, focusPoint)
+	local swoosh = Instance.new("Frame")
+	swoosh.BackgroundColor3 = Color3.new(0, 0, 0)
+	swoosh.BorderSizePixel = 0
+	swoosh.AnchorPoint = Vector2.new(0.5, 0.5)
+	swoosh.Rotation = 45
+	swoosh.Size = UDim2.fromOffset(side, side)
+	swoosh.Position = positionAt(-diagonal * 1.5)
+	swoosh.Parent = gui
 
-	local elapsed = 0
+	local tweenIn = TweenService:Create(
+		swoosh,
+		TweenInfo.new(swooshIn, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{ Position = positionAt(0) }
+	)
 
-	eventTrove:Connect(RunService.PreRender, function(dt: number)
-		elapsed += dt
+	local tweenOut = TweenService:Create(
+		swoosh,
+		TweenInfo.new(swooshOut, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{ Position = positionAt(diagonal * 1.5) }
+	)
 
-		local a = math.clamp(elapsed / cameraTransitionTime, 0, 1)
+	task.spawn(function()
+		tweenIn:Play()
+		tweenIn.Completed:Wait()
 
-		local alpha = -(math.cos(math.pi * a) - 1) / 2
+		local blocks = createPodium(winnersData, eventTrove)
+
+		local middleIndex = math.ceil(#blocks / 2)
+		local middlePart = blocks[middleIndex]
+
+		local focusPoint = middlePart.Position + Vector3.new(0, middlePart.Size.Y * 0.5, 0)
+		local cameraPos = focusPoint + cameraOffset
+
+		for i, playerData in winnersData do
+			showWinnerCharacter(playerData.UserId, i, blocks, eventTrove, cameraPos)
+		end
 
 		camera.CameraType = Enum.CameraType.Scriptable
-		camera.CFrame = startCFrame:Lerp(targetCFrame, alpha)
+		camera.CFrame = CFrame.lookAt(cameraPos, focusPoint)
+
+		task.wait(holdTime)
+
+		tweenOut:Play()
 	end)
 
-	task.delay(cameraTransitionTime + displayDuration + 50, function()
+	task.delay(swooshIn + holdTime + swooshOut + displayDuration + 5, function()
 		camera.CameraType = Enum.CameraType.Custom
 		eventTrove:Clean()
 	end)

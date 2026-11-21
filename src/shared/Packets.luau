@@ -16,6 +16,7 @@ return {
 	DeleteBlock = packet("Deleteblock", { instance = packet.Instance, Position = packet.Vector3S16 }),
 	ScaleBlock = packet("Scaleblock", packet.Instance),
 
+	SetCustomColor = packet("SetCustomColor", packet.NumberU8, packet.NumberU8, packet.NumberU8),
 	-- GameManager
 
 	UpdateTimer = packet("UpdateTimer", packet.NumberU16),

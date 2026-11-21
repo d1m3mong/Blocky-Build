@@ -2,434 +2,276 @@ local themes = {}
 themes.__index = themes
 
 themes.themes = {
-	-- Nature
 	{
-		Name = "Volcano",
-		Difficulty = 3,
-		Category = "Nature",
-		Description = "Build a massive volcano with lava flowing down its sides.",
-	},
-
-	{
-		Name = "Waterfall",
-		Difficulty = 2,
-		Category = "Nature",
-		Description = "Create a beautiful waterfall surrounded by nature.",
-	},
-
-	{
-		Name = "Treehouse",
-		Difficulty = 2,
-		Category = "Nature",
-		Description = "Build a cozy house high up in the trees.",
-	},
-
-	{
-		Name = "Flower Garden",
+		Name = "Giant Toilet",
 		Difficulty = 1,
-		Category = "Nature",
-		Description = "Create a colorful garden filled with beautiful flowers.",
+		Category = "Funny",
+		Description = "Build the most majestic toilet in the world.",
 	},
-
 	{
-		Name = "Jungle",
-		Difficulty = 3,
-		Category = "Nature",
-		Description = "Build a dense jungle filled with trees, plants, and wildlife.",
+		Name = "Funny Face",
+		Difficulty = 1,
+		Category = "Funny",
+		Description = "Build a face with the silliest expression you can think of.",
 	},
-
 	{
-		Name = "Desert Oasis",
-		Difficulty = 3,
-		Category = "Nature",
-		Description = "Create a peaceful oasis hidden in a vast desert.",
-	},
-
-	{
-		Name = "Mountain",
-		Difficulty = 4,
-		Category = "Nature",
-		Description = "Build a tall and impressive mountain landscape.",
-	},
-
-	{
-		Name = "Camping",
+		Name = "Messy Room",
 		Difficulty = 2,
-		Category = "Nature",
-		Description = "Create a cozy campsite surrounded by nature.",
+		Category = "Funny",
+		Description = "Build a bedroom so messy that nobody dares to enter.",
 	},
-
-	-- Buildings
 	{
-		Name = "Castle",
-		Difficulty = 4,
-		Category = "Buildings",
-		Description = "Build a mighty castle with towers, walls, and a grand entrance.",
-	},
-
-	{
-		Name = "Modern House",
-		Difficulty = 3,
-		Category = "Buildings",
-		Description = "Build a stylish modern house with large windows and unique architecture.",
-	},
-
-	{
-		Name = "Farm",
+		Name = "Chicken With Legs Too Long",
 		Difficulty = 2,
-		Category = "Buildings",
-		Description = "Create a working farm with a farmhouse, crops, and animals.",
+		Category = "Funny",
+		Description = "Build a chicken with absurdly long legs.",
 	},
-
 	{
-		Name = "Skyscraper",
-		Difficulty = 4,
-		Category = "Buildings",
-		Description = "Build a huge skyscraper that towers above the city.",
+		Name = "Banana Phone",
+		Difficulty = 1,
+		Category = "Funny",
+		Description = "Build a banana that is secretly a phone.",
 	},
-
 	{
-		Name = "School",
-		Difficulty = 3,
-		Category = "Buildings",
-		Description = "Create a school with classrooms, hallways, and a playground.",
-	},
-
-	{
-		Name = "Library",
-		Difficulty = 3,
-		Category = "Buildings",
-		Description = "Build a large library filled with books and cozy reading areas.",
-	},
-
-	{
-		Name = "Lighthouse",
-		Difficulty = 3,
-		Category = "Buildings",
-		Description = "Build a lighthouse standing proudly beside the ocean.",
-	},
-
-	{
-		Name = "Windmill",
+		Name = "Potato King",
 		Difficulty = 2,
-		Category = "Buildings",
-		Description = "Create a classic windmill surrounded by fields.",
+		Category = "Funny",
+		Description = "Build a potato wearing a crown and ruling over its kingdom.",
 	},
-
 	{
-		Name = "Wizard Tower",
-		Difficulty = 4,
-		Category = "Buildings",
-		Description = "Build a mysterious tower where a powerful wizard might live.",
-	},
-
-	-- Fantasy
-	{
-		Name = "Dragon",
-		Difficulty = 5,
-		Category = "Fantasy",
-		Description = "Build a legendary dragon with impressive wings and details.",
-	},
-
-	{
-		Name = "Magic Kingdom",
-		Difficulty = 5,
-		Category = "Fantasy",
-		Description = "Create a magical kingdom filled with castles, towers, and fantasy buildings.",
-	},
-
-	{
-		Name = "Fairy House",
+		Name = "Sleeping Giant Cat",
 		Difficulty = 2,
-		Category = "Fantasy",
-		Description = "Build a tiny magical home where a fairy could live.",
+		Category = "Funny",
+		Description = "Build a huge cat taking a nap in the weirdest position.",
 	},
-
 	{
-		Name = "Haunted Mansion",
-		Difficulty = 4,
-		Category = "Fantasy",
-		Description = "Create a creepy mansion filled with spooky details.",
+		Name = "Cursed Sandwich",
+		Difficulty = 1,
+		Category = "Funny",
+		Description = "Build a sandwich with ingredients nobody should combine.",
 	},
-
 	{
-		Name = "Ancient Temple",
-		Difficulty = 4,
-		Category = "Fantasy",
-		Description = "Build an ancient temple hidden deep in the wilderness.",
-	},
-
-	{
-		Name = "Monster",
-		Difficulty = 3,
-		Category = "Fantasy",
-		Description = "Create a terrifying monster with a unique design.",
-	},
-
-	-- Adventure
-	{
-		Name = "Pirate Ship",
-		Difficulty = 4,
-		Category = "Adventure",
-		Description = "Build a legendary pirate ship ready to sail the seas.",
-	},
-
-	{
-		Name = "Pirate Island",
-		Difficulty = 4,
-		Category = "Adventure",
-		Description = "Create a pirate island with treasure, palm trees, and a hidden base.",
-	},
-
-	{
-		Name = "Treasure Cave",
-		Difficulty = 3,
-		Category = "Adventure",
-		Description = "Build a mysterious cave filled with hidden treasure.",
-	},
-
-	{
-		Name = "Ancient Ruins",
-		Difficulty = 4,
-		Category = "Adventure",
-		Description = "Create the remains of an ancient civilization.",
-	},
-
-	{
-		Name = "Secret Base",
-		Difficulty = 4,
-		Category = "Adventure",
-		Description = "Build a hidden secret base with traps and secret entrances.",
-	},
-
-	-- Vehicles
-	{
-		Name = "Race Car",
-		Difficulty = 3,
-		Category = "Vehicles",
-		Description = "Build a fast racing car ready to compete on the track.",
-	},
-
-	{
-		Name = "Spaceship",
-		Difficulty = 4,
-		Category = "Vehicles",
-		Description = "Create a futuristic spaceship ready to explore the universe.",
-	},
-
-	{
-		Name = "Airplane",
-		Difficulty = 3,
-		Category = "Vehicles",
-		Description = "Build an airplane with detailed wings, engines, and cockpit.",
-	},
-
-	{
-		Name = "Train",
-		Difficulty = 3,
-		Category = "Vehicles",
-		Description = "Build a detailed train with multiple carriages.",
-	},
-
-	{
-		Name = "Submarine",
-		Difficulty = 4,
-		Category = "Vehicles",
-		Description = "Create a submarine designed to explore the deep ocean.",
-	},
-
-	{
-		Name = "Rocket",
-		Difficulty = 3,
-		Category = "Vehicles",
-		Description = "Build a rocket ready for an epic launch into space.",
-	},
-
-	-- Places
-	{
-		Name = "Amusement Park",
-		Difficulty = 5,
-		Category = "Places",
-		Description = "Create an exciting amusement park with rides and attractions.",
-	},
-
-	{
-		Name = "Zoo",
-		Difficulty = 4,
-		Category = "Places",
-		Description = "Build a zoo with animal enclosures, paths, and visitor areas.",
-	},
-
-	{
-		Name = "City",
-		Difficulty = 5,
-		Category = "Places",
-		Description = "Create a busy city filled with buildings, roads, and landmarks.",
-	},
-
-	{
-		Name = "Beach",
+		Name = "Duck Army",
 		Difficulty = 2,
-		Category = "Places",
-		Description = "Build a relaxing beach with sand, water, and fun activities.",
+		Category = "Funny",
+		Description = "Build a tiny army of very serious ducks.",
 	},
-
 	{
-		Name = "Space Station",
-		Difficulty = 5,
-		Category = "Places",
-		Description = "Create a futuristic space station orbiting far above Earth.",
+		Name = "Evil Broccoli",
+		Difficulty = 1,
+		Category = "Funny",
+		Description = "Build a broccoli with a evil plan.",
 	},
 
-	{
-		Name = "Winter Village",
-		Difficulty = 3,
-		Category = "Places",
-		Description = "Build a cozy village covered in snow and surrounded by mountains.",
-	},
-
-	-- Food
 	{
 		Name = "Pizza",
 		Difficulty = 1,
 		Category = "Food",
-		Description = "Build a giant delicious pizza with your favorite toppings.",
+		Description = "Build a pizza with the strangest toppings possible.",
 	},
-
 	{
 		Name = "Burger",
 		Difficulty = 1,
 		Category = "Food",
-		Description = "Create a massive burger with layers of delicious ingredients.",
+		Description = "Build a burger with way too many layers.",
 	},
-
 	{
-		Name = "Cake",
+		Name = "Ice Cream Tower",
+		Difficulty = 1,
+		Category = "Food",
+		Description = "Build an ice cream cone with as many scoops as you can.",
+	},
+	{
+		Name = "Birthday Cake",
 		Difficulty = 2,
 		Category = "Food",
-		Description = "Build a giant decorated cake for a special celebration.",
+		Description = "Build a cake that looks too good to eat.",
 	},
-
 	{
-		Name = "Ice Cream Shop",
+		Name = "Hot Dog Dog",
+		Difficulty = 1,
+		Category = "Food",
+		Description = "Build a dog that is also a hot dog.",
+	},
+	{
+		Name = "Donut House",
 		Difficulty = 2,
 		Category = "Food",
-		Description = "Create a colorful ice cream shop with lots of different flavors.",
+		Description = "Build a tiny house made out of donuts.",
 	},
 
 	{
-		Name = "Bakery",
+		Name = "Dragon",
 		Difficulty = 3,
-		Category = "Food",
-		Description = "Build a cozy bakery filled with bread, cakes, and pastries.",
+		Category = "Fantasy",
+		Description = "Build a dragon. Friendly, grumpy or sleepy, you decide.",
+	},
+	{
+		Name = "Fairy House",
+		Difficulty = 2,
+		Category = "Fantasy",
+		Description = "Build a tiny home where a fairy could live.",
+	},
+	{
+		Name = "Wizard Hat",
+		Difficulty = 1,
+		Category = "Fantasy",
+		Description = "Build the pointiest wizard hat ever made.",
+	},
+	{
+		Name = "Friendly Monster",
+		Difficulty = 2,
+		Category = "Fantasy",
+		Description = "Build a monster that is much cuter than scary.",
+	},
+	{
+		Name = "Unicorn",
+		Difficulty = 2,
+		Category = "Fantasy",
+		Description = "Build a unicorn with the most magical horn.",
+	},
+	{
+		Name = "Ghost Party",
+		Difficulty = 2,
+		Category = "Fantasy",
+		Description = "Build ghosts having a party at midnight.",
 	},
 
-	-- Seasonal
 	{
-		Name = "Christmas",
-		Difficulty = 3,
-		Category = "Seasonal",
-		Description = "Create a magical Christmas scene filled with decorations and presents.",
+		Name = "Robot",
+		Difficulty = 2,
+		Category = "Sci-Fi",
+		Description = "Build a robot that is slightly broken.",
 	},
-
 	{
-		Name = "Halloween",
-		Difficulty = 3,
-		Category = "Seasonal",
-		Description = "Build a spooky Halloween scene filled with pumpkins and decorations.",
+		Name = "Alien",
+		Difficulty = 2,
+		Category = "Sci-Fi",
+		Description = "Build an alien visiting Earth for the first time.",
+	},
+	{
+		Name = "Rocket",
+		Difficulty = 2,
+		Category = "Sci-Fi",
+		Description = "Build a rocket ready for an epic launch.",
+	},
+	{
+		Name = "UFO",
+		Difficulty = 1,
+		Category = "Sci-Fi",
+		Description = "Build a flying saucer abducting something silly.",
+	},
+	{
+		Name = "Moon Cheese",
+		Difficulty = 1,
+		Category = "Sci-Fi",
+		Description = "Build a moon that is actually made of cheese.",
 	},
 
 	{
 		Name = "Snowman",
 		Difficulty = 1,
 		Category = "Seasonal",
-		Description = "Build a funny or creative snowman with unique decorations.",
+		Description = "Build the most creative snowman you can imagine.",
 	},
-
 	{
-		Name = "Santa's Workshop",
-		Difficulty = 4,
-		Category = "Seasonal",
-		Description = "Create Santa's magical workshop where presents are made.",
-	},
-
-	{
-		Name = "Pumpkin Patch",
+		Name = "Christmas Tree",
 		Difficulty = 2,
 		Category = "Seasonal",
-		Description = "Build a pumpkin patch ready for the Halloween season.",
+		Description = "Build a Christmas tree with unusual decorations.",
 	},
-
-	-- Sci-Fi
 	{
-		Name = "Robot",
-		Difficulty = 3,
-		Category = "Sci-Fi",
-		Description = "Build a futuristic robot with mechanical details.",
+		Name = "Pumpkin Face",
+		Difficulty = 1,
+		Category = "Seasonal",
+		Description = "Build a pumpkin with a spooky or silly face.",
 	},
-
 	{
-		Name = "Alien",
-		Difficulty = 3,
-		Category = "Sci-Fi",
-		Description = "Create a strange alien creature from another planet.",
+		Name = "Present Pile",
+		Difficulty = 1,
+		Category = "Seasonal",
+		Description = "Build a huge pile of presents. What is inside?",
 	},
 
 	{
-		Name = "Alien Invasion",
-		Difficulty = 5,
-		Category = "Sci-Fi",
-		Description = "Build a scene showing aliens invading a futuristic city.",
-	},
-
-	{
-		Name = "Secret Laboratory",
-		Difficulty = 4,
-		Category = "Sci-Fi",
-		Description = "Create a mysterious laboratory filled with futuristic technology.",
-	},
-
-	{
-		Name = "Moon Base",
-		Difficulty = 4,
-		Category = "Sci-Fi",
-		Description = "Build a futuristic base on the surface of the Moon.",
-	},
-
-	-- Funny
-	{
-		Name = "Giant Toilet",
+		Name = "Treehouse",
 		Difficulty = 2,
-		Category = "Funny",
-		Description = "Build the biggest and funniest toilet imaginable.",
+		Category = "Nature",
+		Description = "Build a cozy house up in a tree.",
 	},
-
 	{
-		Name = "Messy Room",
+		Name = "Volcano",
 		Difficulty = 2,
-		Category = "Funny",
-		Description = "Create an extremely messy bedroom filled with random objects.",
+		Category = "Nature",
+		Description = "Build a volcano that is just about to erupt.",
 	},
-
 	{
-		Name = "Funny Face",
+		Name = "Flower",
+		Difficulty = 1,
+		Category = "Nature",
+		Description = "Build the biggest and most colorful flower.",
+	},
+	{
+		Name = "Sad Cloud",
+		Difficulty = 1,
+		Category = "Nature",
+		Description = "Build a cloud that is having a really bad day.",
+	},
+	{
+		Name = "Tiny Island",
 		Difficulty = 2,
-		Category = "Funny",
-		Description = "Build a giant funny face with a ridiculous expression.",
+		Category = "Nature",
+		Description = "Build a tiny island with one palm tree and one big secret.",
 	},
 
 	{
-		Name = "Giant Chicken",
+		Name = "Pirate Ship",
 		Difficulty = 3,
-		Category = "Funny",
-		Description = "Create a gigantic chicken that towers over everything around it.",
+		Category = "Adventure",
+		Description = "Build a pirate ship with a very silly crew.",
+	},
+	{
+		Name = "Treasure Chest",
+		Difficulty = 1,
+		Category = "Adventure",
+		Description = "Build a treasure chest. Is it a trap?",
+	},
+	{
+		Name = "Sandcastle",
+		Difficulty = 2,
+		Category = "Adventure",
+		Description = "Build a sandcastle before the tide comes in.",
+	},
+	{
+		Name = "Mini Castle",
+		Difficulty = 3,
+		Category = "Adventure",
+		Description = "Build a small castle with one very strange room.",
 	},
 
 	{
-		Name = "Boss Battle",
-		Difficulty = 5,
-		Category = "Funny",
-		Description = "Build an epic scene showing a hero fighting a powerful boss.",
+		Name = "Race Car",
+		Difficulty = 2,
+		Category = "Vehicles",
+		Description = "Build the fastest-looking car you can imagine.",
+	},
+	{
+		Name = "Flying Bathtub",
+		Difficulty = 2,
+		Category = "Vehicles",
+		Description = "Build a bathtub that can fly.",
+	},
+	{
+		Name = "Submarine",
+		Difficulty = 2,
+		Category = "Vehicles",
+		Description = "Build a submarine for exploring the deep sea.",
+	},
+	{
+		Name = "Chair On Wheels",
+		Difficulty = 1,
+		Category = "Vehicles",
+		Description = "Build the most ridiculous vehicle made from a chair.",
 	},
 }
 
@@ -443,7 +285,6 @@ export type Map = {
 function themes.getMapData(mapName: string): Map?
 	for _, map in pairs(themes.themes) do
 		if map.Name == mapName then
-			print(map)
 			return map
 		end
 	end

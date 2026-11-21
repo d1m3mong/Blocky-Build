@@ -52,6 +52,15 @@ function gameManager.startGame(self: gameManager)
 		--return
 	end
 
+	local oldEntitys = {}
+	for entity in world:query(playerRef) do
+		table.insert(oldEntitys, entity)
+	end
+
+	for _, entity in oldEntitys do
+		world:delete(entity)
+	end
+
 	gameManagerSignals.gameStart:Fire()
 	table.clear(self.votes)
 
@@ -269,7 +278,7 @@ function gameManager.result(self: gameManager)
 
 	local nominatedPlayers: { VoteEntry } = nominate(sortedList)
 
-	print(nominatedPlayers)
+	print(nominatedPlayers .. " Nominated !")
 
 	local winnersData = {}
 	for i = 1, #nominatedPlayers do

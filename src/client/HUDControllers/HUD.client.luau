@@ -54,7 +54,6 @@ Packets.UpdateGameState.OnClientEvent:Connect(function(state: string)
 		end
 
 		deletionKeyAllowed(true)
-		print "Found Needle in Haystack in 0.0121ms!"
 
 		return
 	end

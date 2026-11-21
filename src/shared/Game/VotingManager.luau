@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+const RunService = game:GetService("RunService")
 local Themes = require(script.Parent.Themes)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local VotingManager = {}
@@ -25,6 +26,10 @@ local function getRandomMaps()
 end
 
 function VotingManager.new(): VotingManager
+	if RunService:IsServer() ~= true then
+		return {}
+	end
+
 	local self = {}
 	setmetatable(self, VotingManager)
 

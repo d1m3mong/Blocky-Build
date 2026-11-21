@@ -22,7 +22,7 @@ local effect = vide.effect
 local indexes = vide.indexes
 local show = vide.show
 
-local finalFramePosition = Vector2.new(0.7, 0.5)
+local finalFramePosition = Vector2.new(0.65, 0.5)
 local hiddenFramePosition = Vector2.new(1.2, 0.5)
 
 local finalResultPosition = Vector2.new(0.5, 0.5)
@@ -154,7 +154,11 @@ end)
 local nomineesList = source({} :: { () -> ratingEntry? })
 
 Packets.ReplicateNominations.OnClientEvent:Connect(function(nominees: { ratingEntry })
+	print("Received Server nominies!")
+	print(nominees)
 	nomineesList(nominees)
+
+	print(nomineesList())
 end)
 
 local resultState: () -> boolean = source(false)
@@ -300,8 +304,8 @@ root(function()
 				ListPadding = UDim.new(0, 4),
 			},
 
-			indexes(nomineesList, function(entry, key)
-				return createNominee(entry())
+			vide.values(nomineesList, function(entry, key)
+				return createNominee(entry)
 			end),
 		},
 	}

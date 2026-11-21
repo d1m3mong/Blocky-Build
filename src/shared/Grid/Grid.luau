@@ -8,10 +8,17 @@ type grid = GridTypes.Grid
 local Grid = {}
 Grid.__index = Grid
 
-local function createPart(Position: Vector3, index: number, folder: Folder): ()
+local tileSize = 3.5
+local tileHeight = 0.5
+
+local function snap(value: number): number
+	return math.round(value / tileSize) * tileSize
+end
+
+local function createPart(Position: Vector3, index: number, folder: Folder): Part
 	local Tile = Instance.new("Part")
 	Tile.Color = if index % 2 == 0 then Color3.fromRGB(232, 230, 230) else Color3.fromRGB(143, 143, 143)
-	Tile.Size = Vector3.new(5, 0.5, 5)
+	Tile.Size = Vector3.new(tileSize, tileHeight, tileSize)
 	Tile.Position = Position
 
 	Tile.Anchored = true
@@ -31,13 +38,18 @@ function Grid:setupGrid(player: Player, part: Part): grid
 
 	folder.Parent = workspace
 
-	local gridSize = 11
-	local tileSize = 5
+	local gridSize = 20
 	local offset = (gridSize - 1) / 2
+
+	local origin = Vector3.new(
+		snap(part.Position.X),
+		snap(part.Position.Y + tileSize / 2 + tileHeight / 2) - tileSize / 2 - tileHeight / 2,
+		snap(part.Position.Z)
+	)
 
 	for i = 0, gridSize - 1 do
 		for j = 0, gridSize - 1 do
-			local position = part.Position + Vector3.new((i - offset) * tileSize, 2, (j - offset) * tileSize)
+			local position = origin + Vector3.new((i - offset) * tileSize, 0, (j - offset) * tileSize)
 
 			table.insert(t, createPart(position, i - j, folder))
 		end
@@ -50,7 +62,7 @@ function Grid:setupGrid(player: Player, part: Part): grid
 	p.CastShadow = false
 	p.Transparency = 1
 
-	p.Position = part.Position
+	p.Position = origin
 
 	table.insert(t, p)
 
@@ -62,15 +74,12 @@ local function isolateXZ(vec: Vector3): Vector3
 end
 
 function Grid:shareSamePosition(grid: grid, blockPos: Vector3): boolean
-	for _, tile: tile in grid do
-		if blockPos.X ~= tile.Position.X or blockPos.Z ~= tile.Position.Z then
-			continue
-		end
+	local root = grid[#grid]
+	local offset = blockPos - root.Position
 
-		return true
-	end
+	local half = (35 * 3.5) / 2
 
-	return
+	return math.abs(offset.X) <= half and math.abs(offset.Z) <= half
 end
 
 return Grid

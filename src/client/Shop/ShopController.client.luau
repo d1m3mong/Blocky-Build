@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+const StarterPlayer = game:GetService("StarterPlayer")
 
+const gameManagerClient = require(StarterPlayer.StarterPlayerScripts.Client.gameManagerClient)
 local sift = require(ReplicatedStorage.Packages.sift)
 local vide = require(ReplicatedStorage.Packages.vide)
 local videRipple = require(ReplicatedStorage.Packages["vide-ripple"])
@@ -79,6 +81,10 @@ app = root(function()
 
 			OnClick = function()
 				toggleShop()
+			end,
+
+			Visible = function()
+				return gameManagerClient.getGameState() == "intermission" or not gameManagerClient.isInGame()
 			end,
 		},
 

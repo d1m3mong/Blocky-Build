@@ -16,6 +16,7 @@ local BlocksList = require(script.Parent.BlocksList)
 type Block = BlockTypes.Block
 
 local Trove = require(ReplicatedStorage.Packages.trove)
+const CustomColors = require(ReplicatedStorage.Shared.Blocks.Blocks.CustomColors)
 local Packets = require(ReplicatedStorage.Shared.Packets)
 local DeletionModeSignal = require(ReplicatedStorage.Shared.Signals.DeletionModeSignal)
 
@@ -26,6 +27,7 @@ local function snapToGrid(value: number, grid: number): number
 	return math.round(value / grid) * grid
 end
 
+const blockSize = 3.5
 const speed = 10
 
 const params = RaycastParams.new()
@@ -142,7 +144,7 @@ function BlockPlacement:start(player: Player): ()
 
 	local block = playerTrove:Add(Instance.new("Part")) :: Part
 
-	block.Size = Vector3.new(4.999, 4.999, 4.999)
+	block.Size = Vector3.new(blockSize - 0.001, blockSize - 0.001, blockSize - 0.001)
 	block.Anchored = true
 	block.CanCollide = false
 	block.CanQuery = false
@@ -161,7 +163,7 @@ function BlockPlacement:start(player: Player): ()
 
 		local position = ray.Position + ray.Normal * (block.Size.Y / 2)
 
-		local goal = Vector3.new(snapToGrid(position.X, 5), snapToGrid(position.Y, 5), snapToGrid(position.Z, 5))
+		local goal = Vector3.new(snapToGrid(position.X, 3.5), snapToGrid(position.Y, 3.5), snapToGrid(position.Z, 3.5))
 		local targetCFrame = CFrame.new(goal)
 
 		local inbound = workspace:GetPartBoundsInBox(targetCFrame, block.Size, overlap)
@@ -196,18 +198,25 @@ function BlockPlacement:Place(Block: Block, player: Player)
 	overlap.FilterType = Enum.RaycastFilterType.Include
 	overlap.FilterDescendantsInstances = { blockFolder, player.Character }
 
-	local inbound = workspace:GetPartBoundsInBox(CFrame.new(Block.Position), Vector3.new(4.9, 4.9, 4.9), overlap)
+	local inbound = workspace:GetPartBoundsInBox(CFrame.new(Block.Position), Vector3.new(2.9, 2.9, 2.9), overlap)
 
 	if #inbound > 0 then
+		print "NOPE LIL BRO"
 		return
 	end
 
 	local block = Instance.new("Part")
 
-	block.Color = BlocksList.BlockList[Block.Id].Color or Color3.fromRGB(177, 170, 170)
+	local color = BlocksList.BlockList[Block.Id].Color
+
+	if Block.Id == BlocksList.CustomName then
+		color = CustomColors.get(player) or color
+	end
+
+	block.Color = color or Color3.fromRGB(177, 170, 170)
 
 	block.Position = Block.Position
-	block.Size = Vector3.new(5, 5, 5)
+	block.Size = Vector3.new(blockSize, blockSize, blockSize)
 	block.Anchored = true
 
 	block.Parent = blockFolder

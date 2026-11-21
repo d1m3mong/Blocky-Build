@@ -99,6 +99,7 @@ t = UserInputService.InputBegan:Connect(function(input: InputObject, gpe: boolea
 
 		local pos: Vector3 = determinBlockPosition()
 		if not pos then
+			print "MEOW"
 			return
 		end
 
